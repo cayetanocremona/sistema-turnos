@@ -1,0 +1,38 @@
+export const RESERVED_SLUGS = [
+  "admin",
+  "login",
+  "logout",
+  "signup",
+  "register",
+  "api",
+  "dev",
+  "docs",
+  "app",
+  "dashboard",
+  "settings",
+  "account",
+  "turnos",
+  "negocio",
+  "negocios",
+  "about",
+  "contact",
+  "contacto",
+  "terms",
+  "privacy",
+  "legal",
+  "help",
+  "ayuda",
+  "support",
+  "soporte",
+  "static",
+  "public",
+  "www",
+  "auth",
+  "new",
+  "edit",
+  "delete",
+];
+
+export function isReservedSlug(slug: string): boolean {
+  return RESERVED_SLUGS.includes(slug.toLowerCase());
+}

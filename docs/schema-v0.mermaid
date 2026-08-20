@@ -1,0 +1,38 @@
+erDiagram
+    businesses ||--o{ resources : "tiene"
+    businesses ||--o{ appointments : "tiene"
+    resources ||--o{ appointments : "se reserva en"
+    clients ||--o{ appointments : "reserva"
+
+    businesses {
+        uuid id PK
+        text name
+        text slug
+        timestamptz created_at
+    }
+
+    resources {
+        uuid id PK
+        uuid business_id FK
+        text name
+        timestamptz created_at
+    }
+
+    clients {
+        uuid id PK
+        text name
+        text phone
+        text email
+        timestamptz created_at
+    }
+
+    appointments {
+        uuid id PK
+        uuid business_id FK
+        uuid resource_id FK
+        uuid client_id FK
+        timestamptz start_time
+        timestamptz end_time
+        text status
+        timestamptz created_at
+    }
