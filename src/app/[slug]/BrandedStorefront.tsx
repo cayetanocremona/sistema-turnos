@@ -100,6 +100,23 @@ function Card({ theme, children }: { theme: StorefrontTheme; children: ReactNode
   );
 }
 
+// Grilla responsive sin media queries: auto-fit + minmax arma varias columnas
+// cuando hay ancho disponible (desktop) y cae a 1 sola columna cuando no
+// (mobile) -- el mismo layout sirve para los dos casos sin breakpoints.
+function CardGrid({ children }: { children: ReactNode }) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(240px, 340px))",
+        gap: 10,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function Hero({ business, theme }: { business: Business; theme: StorefrontTheme }) {
   const initials = getBusinessInitials(business.name);
 
@@ -134,7 +151,7 @@ function Hero({ business, theme }: { business: Business; theme: StorefrontTheme 
       <div
         style={{
           position: "relative",
-          height: 210,
+          height: "clamp(180px, 26vw, 340px)",
           borderRadius: 14,
           overflow: "hidden",
           backgroundImage: `url(${business.hero_image_url})`,
@@ -148,15 +165,17 @@ function Hero({ business, theme }: { business: Business; theme: StorefrontTheme 
   if (theme.bannerLayout) {
     // "deportivo": las iniciales sangran como marca de agua detrás del título,
     // dentro del banner de color (ver Hero dentro del banner en BannerHeader).
+    // Tamaño y posición en % / vw -- escalan con el ancho del banner en vez de
+    // quedar clavados al tamaño del mockup mobile.
     return (
       <div
         aria-hidden
         style={{
           position: "absolute",
-          right: -20,
-          top: -10,
+          right: "2%",
+          top: "-6%",
           fontFamily: theme.fontDisplay,
-          fontSize: 170,
+          fontSize: "clamp(140px, 16vw, 280px)",
           lineHeight: 1,
           color: theme.heroMonogramColor,
           opacity: 0.28,
@@ -173,7 +192,7 @@ function Hero({ business, theme }: { business: Business; theme: StorefrontTheme 
     <div
       style={{
         position: "relative",
-        height: 210,
+        height: "clamp(180px, 26vw, 340px)",
         borderRadius: 14,
         overflow: "hidden",
         background: theme.heroBg,
@@ -182,7 +201,14 @@ function Hero({ business, theme }: { business: Business; theme: StorefrontTheme 
         justifyContent: "center",
       }}
     >
-      <span style={{ fontFamily: theme.fontDisplay, fontSize: 104, fontWeight: 600, color: theme.heroMonogramColor }}>
+      <span
+        style={{
+          fontFamily: theme.fontDisplay,
+          fontSize: "clamp(72px, 11vw, 160px)",
+          fontWeight: 600,
+          color: theme.heroMonogramColor,
+        }}
+      >
         {initials}
       </span>
     </div>
@@ -207,10 +233,16 @@ export default function BrandedStorefront({
     formData: FormData
   ) => Promise<PublicAppointmentFormState>;
 }) {
+  // Padding lateral fijo (390px, ancho del mockup mobile) escalado con clamp()
+  // en vez de hardcodeado: mismo look en celular, más aire en desktop, sin
+  // necesidad de media queries.
+  const sidePad = "clamp(20px, 4vw, 56px)";
+
   return (
     <main
       style={{
-        maxWidth: 480,
+        width: "100%",
+        maxWidth: 1040,
         margin: "0 auto",
         background: theme.pageBg,
         color: theme.pageText,
@@ -220,7 +252,14 @@ export default function BrandedStorefront({
       }}
     >
       {theme.bannerLayout ? (
-        <div style={{ position: "relative", background: theme.heroBg, overflow: "hidden", padding: "20px 20px 30px 20px" }}>
+        <div
+          style={{
+            position: "relative",
+            background: theme.heroBg,
+            overflow: "hidden",
+            padding: `20px ${sidePad} 30px ${sidePad}`,
+          }}
+        >
           <Hero business={business} theme={theme} />
           <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 10 }}>
             <Badge business={business} theme={theme} size={34} />
@@ -241,7 +280,7 @@ export default function BrandedStorefront({
               zIndex: 1,
               marginTop: 26,
               fontFamily: theme.fontDisplay,
-              fontSize: 28,
+              fontSize: "clamp(28px, 4vw, 44px)",
               lineHeight: 1.15,
               color: business.hero_image_url ? "#ffffff" : theme.accentText,
             }}
@@ -251,17 +290,31 @@ export default function BrandedStorefront({
         </div>
       ) : (
         <>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "20px 20px 16px 20px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: `20px ${sidePad} 16px ${sidePad}`,
+            }}
+          >
             <Badge business={business} theme={theme} size={34} />
             <div style={{ fontFamily: theme.fontDisplay, fontSize: 20, fontWeight: 600, letterSpacing: "0.02em" }}>
               {business.name}
             </div>
           </div>
-          <div style={{ margin: "0 20px" }}>
+          <div style={{ margin: `0 ${sidePad}` }}>
             <Hero business={business} theme={theme} />
           </div>
-          <div style={{ padding: "22px 20px 4px 20px" }}>
-            <div style={{ fontFamily: theme.fontDisplay, fontSize: 30, fontWeight: 600, lineHeight: 1.15 }}>
+          <div style={{ padding: `22px ${sidePad} 4px ${sidePad}` }}>
+            <div
+              style={{
+                fontFamily: theme.fontDisplay,
+                fontSize: "clamp(30px, 3.5vw, 44px)",
+                fontWeight: 600,
+                lineHeight: 1.15,
+              }}
+            >
               {business.name}
             </div>
           </div>
@@ -269,9 +322,9 @@ export default function BrandedStorefront({
       )}
 
       {serviceList.length > 0 && (
-        <div style={{ padding: "26px 20px 0 20px" }}>
+        <div style={{ padding: `26px ${sidePad} 0 ${sidePad}` }}>
           <SectionLabel theme={theme}>Servicios</SectionLabel>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <CardGrid>
             {serviceList.map((s) => (
               <Card key={s.id} theme={theme}>
                 <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -281,46 +334,56 @@ export default function BrandedStorefront({
                 <span style={{ fontSize: 15, fontWeight: 700 }}>{formatPrice(s.price)}</span>
               </Card>
             ))}
-          </div>
+          </CardGrid>
         </div>
       )}
 
-      <div style={{ padding: "26px 20px 0 20px" }}>
+      <div style={{ padding: `26px ${sidePad} 0 ${sidePad}` }}>
         <SectionLabel theme={theme}>Recursos disponibles</SectionLabel>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {resourceList.map((r) => (
-            <Card key={r.id} theme={theme}>
-              <span style={{ fontSize: 15, fontWeight: 600 }}>{r.name}</span>
-            </Card>
-          ))}
-          {resourceList.length === 0 && (
-            <span style={{ fontSize: 14, color: theme.mutedText }}>Todavía no hay recursos cargados.</span>
-          )}
-        </div>
+        {resourceList.length === 0 ? (
+          <span style={{ fontSize: 14, color: theme.mutedText }}>Todavía no hay recursos cargados.</span>
+        ) : (
+          <CardGrid>
+            {resourceList.map((r) => (
+              <Card key={r.id} theme={theme}>
+                <span style={{ fontSize: 15, fontWeight: 600 }}>{r.name}</span>
+              </Card>
+            ))}
+          </CardGrid>
+        )}
       </div>
 
-      <div style={{ padding: "26px 20px 0 20px" }}>
+      <div style={{ padding: `26px ${sidePad} 0 ${sidePad}` }}>
         <SectionLabel theme={theme}>Horarios de atención</SectionLabel>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-          {hoursList.map((h) => (
-            <div key={h.id} style={{ fontSize: 14, color: theme.mutedText }}>
-              {DAY_NAMES[h.day_of_week]}: {formatTime(h.start_time)}–{formatTime(h.end_time)}
-            </div>
-          ))}
-          {hoursList.length === 0 && (
-            <span style={{ fontSize: 14, color: theme.mutedText }}>Todavía no hay horarios cargados.</span>
-          )}
-        </div>
+        {hoursList.length === 0 ? (
+          <span style={{ fontSize: 14, color: theme.mutedText }}>Todavía no hay horarios cargados.</span>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 240px))",
+              gap: "4px 24px",
+            }}
+          >
+            {hoursList.map((h) => (
+              <div key={h.id} style={{ fontSize: 14, color: theme.mutedText }}>
+                {DAY_NAMES[h.day_of_week]}: {formatTime(h.start_time)}–{formatTime(h.end_time)}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      <div style={{ padding: "30px 20px 0 20px" }}>
+      <div style={{ padding: `30px ${sidePad} 0 ${sidePad}` }}>
         <SectionLabel theme={theme}>Reservar un turno</SectionLabel>
         {resourceList.length === 0 ? (
           <p style={{ fontSize: 14, color: theme.mutedText }}>
             Este negocio todavía no tiene recursos disponibles para reservar.
           </p>
         ) : (
-          <PublicAppointmentForm resources={resourceList} services={serviceList} action={action} theme={theme} />
+          <div style={{ maxWidth: 420 }}>
+            <PublicAppointmentForm resources={resourceList} services={serviceList} action={action} theme={theme} />
+          </div>
         )}
       </div>
     </main>
