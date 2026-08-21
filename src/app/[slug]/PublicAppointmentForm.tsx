@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
+import type { CSSProperties } from "react";
+import type { StorefrontTheme } from "./theme";
 
 type Resource = { id: string; name: string };
 type Service = { id: string; name: string; duration_minutes: number; price: number | string };
@@ -15,6 +17,7 @@ export default function PublicAppointmentForm({
   resources,
   services,
   action,
+  theme,
 }: {
   resources: Resource[];
   services: Service[];
@@ -22,6 +25,8 @@ export default function PublicAppointmentForm({
     prevState: PublicAppointmentFormState,
     formData: FormData
   ) => Promise<PublicAppointmentFormState>;
+  // Sin theme (preset "clasico"): estilos inline planos originales, sin cambios.
+  theme?: StorefrontTheme;
 }) {
   const [state, formAction, isPending] = useActionState(action, {
     error: null,
@@ -30,12 +35,42 @@ export default function PublicAppointmentForm({
 
   const hasServices = services.length > 0;
 
+  const fieldStyle: CSSProperties = theme
+    ? {
+        padding: 10,
+        borderRadius: 8,
+        border: `1px solid ${theme.cardBorder}`,
+        background: theme.cardBg,
+        color: theme.pageText,
+        fontFamily: theme.fontBody,
+        fontSize: 14,
+      }
+    : { padding: 8 };
+
+  const labelStyle: CSSProperties = theme
+    ? { fontSize: 13, color: theme.mutedText, display: "flex", flexDirection: "column", gap: 4 }
+    : { fontSize: 14, color: "#666", display: "flex", flexDirection: "column", gap: 4 };
+
+  const buttonStyle: CSSProperties = theme
+    ? {
+        padding: 13,
+        borderRadius: 10,
+        border: "none",
+        background: theme.accent,
+        color: theme.accentText,
+        fontFamily: theme.fontBody,
+        fontSize: 14.5,
+        fontWeight: 700,
+        cursor: "pointer",
+      }
+    : { padding: 8, cursor: "pointer" };
+
   return (
     <form
       action={formAction}
       style={{ display: "flex", flexDirection: "column", gap: 8, margin: "24px 0" }}
     >
-      <select name="resource_id" required defaultValue="" style={{ padding: 8 }}>
+      <select name="resource_id" required defaultValue="" style={fieldStyle}>
         <option value="" disabled>
           Elegí un recurso
         </option>
@@ -47,7 +82,7 @@ export default function PublicAppointmentForm({
       </select>
 
       {hasServices && (
-        <select name="service_id" required defaultValue="" style={{ padding: 8 }}>
+        <select name="service_id" required defaultValue="" style={fieldStyle}>
           <option value="" disabled>
             Elegí un servicio
           </option>
@@ -59,26 +94,26 @@ export default function PublicAppointmentForm({
         </select>
       )}
 
-      <input name="client_name" placeholder="Tu nombre" required style={{ padding: 8 }} />
-      <input name="client_phone" placeholder="Tu teléfono" required style={{ padding: 8 }} />
+      <input name="client_name" placeholder="Tu nombre" required style={fieldStyle} />
+      <input name="client_phone" placeholder="Tu teléfono" required style={fieldStyle} />
 
-      <label style={{ fontSize: 14, color: "#666", display: "flex", flexDirection: "column", gap: 4 }}>
+      <label style={labelStyle}>
         Inicio
-        <input name="start_time" type="datetime-local" required style={{ padding: 8 }} />
+        <input name="start_time" type="datetime-local" required style={fieldStyle} />
       </label>
       {!hasServices && (
-        <label style={{ fontSize: 14, color: "#666", display: "flex", flexDirection: "column", gap: 4 }}>
+        <label style={labelStyle}>
           Fin
-          <input name="end_time" type="datetime-local" required style={{ padding: 8 }} />
+          <input name="end_time" type="datetime-local" required style={fieldStyle} />
         </label>
       )}
 
-      <button type="submit" disabled={isPending} style={{ padding: 8, cursor: "pointer" }}>
+      <button type="submit" disabled={isPending} style={buttonStyle}>
         {isPending ? "Reservando..." : "Reservar turno"}
       </button>
 
-      {state.error && <p style={{ color: "red" }}>{state.error}</p>}
-      {state.success && <p style={{ color: "green" }}>¡Turno reservado con éxito!</p>}
+      {state.error && <p style={{ color: theme ? "#e5484d" : "red" }}>{state.error}</p>}
+      {state.success && <p style={{ color: theme ? "#30a46c" : "green" }}>¡Turno reservado con éxito!</p>}
     </form>
   );
 }

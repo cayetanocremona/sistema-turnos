@@ -2,6 +2,8 @@ import { supabase } from "@/lib/supabaseClient";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import PublicAppointmentForm from "./PublicAppointmentForm";
+import BrandedStorefront from "./BrandedStorefront";
+import { getStorefrontTheme } from "./theme";
 import { localInputToInstant, getLocalDateParts, addMinutesToInstant } from "@/lib/datetime";
 
 const DAY_NAMES = [
@@ -201,6 +203,24 @@ export default async function BusinessPage({ params }: PageProps<"/[slug]">) {
 
     revalidatePath(`/${slug}`);
     return { error: null, success: true };
+  }
+
+  // "clasico" (default de todo negocio existente) sigue el markup original de
+  // v0-v3 sin cambios, para garantizar cero regresión visual. El resto de los
+  // presets pasa por el theming nuevo en BrandedStorefront -- ver AGENTS.md
+  // "branding por negocio" y src/app/[slug]/theme.ts.
+  if (business.brand_style_preset !== "clasico") {
+    const theme = getStorefrontTheme(business.brand_style_preset, business.brand_color);
+    return (
+      <BrandedStorefront
+        business={business}
+        theme={theme}
+        resourceList={resourceList}
+        hoursList={hoursList}
+        serviceList={serviceList}
+        action={addPublicAppointment}
+      />
+    );
   }
 
   return (
