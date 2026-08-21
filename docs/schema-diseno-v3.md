@@ -1,6 +1,6 @@
 # Diseño de esquema — v3 parte 1 (catálogo de servicios)
 
-Extiende `docs/schema-diseno-v1.md`. Ya aplicado en Supabase (migración `006_services_v3`).
+Extiende `docs/schema-diseno-v1.md`. Ya aplicado en Supabase (migración `007_services_v3`).
 
 ## Tabla nueva
 
@@ -24,10 +24,10 @@ Las preguntas de negocio que quedaron pendientes en la parte 1 ya se resolvieron
 
 - **¿Quién define la duración del turno?** El servicio elegido, siempre que el negocio tenga catálogo cargado. `end_time = start_time + duration_minutes` se calcula en el servidor (Server Action), nunca lo manda el cliente — así un cliente malicioso no puede mandar un `end_time` arbitrario. Helper: `addMinutesToInstant` en `src/lib/datetime.ts`.
 - **¿Un recurso puede ofrecer varios servicios?** Sí, sin restricción — igual que hoy no hay restricción entre recurso y horario. `services` no tiene FK a `resources`; el cliente elige recurso y servicio de forma independiente. Si en el futuro hace falta acotar qué servicios aplican a qué recurso, es una tabla puente nueva, no un cambio de este esquema.
-- **¿Qué pasa si se borra o edita un servicio con turnos ya creados?** `appointments.service_id` es `on delete set null` (migración `007_appointments_service_id.sql`): el turno histórico sobrevive sin servicio asociado en vez de romperse o arrastrar el borrado. Editar un servicio (precio/duración) no toca los turnos ya creados — el `end_time` ya quedó grabado en el momento de la reserva.
+- **¿Qué pasa si se borra o edita un servicio con turnos ya creados?** `appointments.service_id` es `on delete set null` (migración `008_appointments_service_id.sql`): el turno histórico sobrevive sin servicio asociado en vez de romperse o arrastrar el borrado. Editar un servicio (precio/duración) no toca los turnos ya creados — el `end_time` ya quedó grabado en el momento de la reserva.
 - **¿Y si el negocio todavía no cargó ningún servicio?** No se bloquea la reserva. Con catálogo vacío, el formulario (público y de admin) cae al modo manual de v1/v2: el dueño/cliente escribe `start_time` y `end_time` a mano, `service_id` queda `null`. En cuanto el negocio carga al menos un servicio, el formulario exige elegir uno (ya no se puede reservar "sin servicio") y el campo `end_time` desaparece del form porque se calcula solo. Se decidió así para no cortarle la toma de turnos a un negocio recién dado de alta que todavía no armó su catálogo — un negocio que hoy toma turnos sin servicios no puede quedar bloqueado de un día para el otro por este cambio.
 
-RLS: la policy de alta pública (`anon`) de `appointments` ahora exige que `resource_id` y `service_id` (si viene) pertenezcan al `business_id` declarado (migración `008_appointments_insert_anon_validate_shape.sql`) — antes tenía `with_check = true` sin validar nada, hallazgo de auditoría al implementar esto: cualquiera con la anon key podía insertar un turno llamando directo a la API REST de Supabase con un `resource_id` de otro negocio.
+RLS: la policy de alta pública (`anon`) de `appointments` ahora exige que `resource_id` y `service_id` (si viene) pertenezcan al `business_id` declarado (migración `009_appointments_insert_anon_validate_shape.sql`) — antes tenía `with_check = true` sin validar nada, hallazgo de auditoría al implementar esto: cualquiera con la anon key podía insertar un turno llamando directo a la API REST de Supabase con un `resource_id` de otro negocio.
 
 ## Moneda del precio
 
