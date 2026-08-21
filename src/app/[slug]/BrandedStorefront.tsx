@@ -238,154 +238,167 @@ export default function BrandedStorefront({
   // necesidad de media queries.
   const sidePad = "clamp(20px, 4vw, 56px)";
 
+  // El fondo (`theme.pageBg` / `theme.heroBg`) va en un wrapper a `width: 100%`
+  // para que sangre hasta los bordes de la ventana en pantallas anchas; el
+  // contenido (texto, cards, form) se centra adentro con su propio
+  // `maxWidth: 1040` -- así el banner de color no queda encajonado en una
+  // columna angosta mientras el resto del layout sigue siendo legible.
   return (
-    <main
+    <div
       style={{
         width: "100%",
-        maxWidth: 1040,
-        margin: "0 auto",
         background: theme.pageBg,
         color: theme.pageText,
         fontFamily: theme.fontBody,
         minHeight: "100vh",
-        paddingBottom: 48,
       }}
     >
-      {theme.bannerLayout ? (
+      {theme.bannerLayout && (
         <div
           style={{
             position: "relative",
             background: theme.heroBg,
             overflow: "hidden",
-            padding: `20px ${sidePad} 30px ${sidePad}`,
           }}
         >
           <Hero business={business} theme={theme} />
-          <div style={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 10 }}>
-            <Badge business={business} theme={theme} size={34} />
-            <div
-              style={{
-                fontFamily: theme.fontDisplay,
-                fontSize: 16,
-                color: business.hero_image_url ? "#ffffff" : theme.accentText,
-                letterSpacing: "0.01em",
-              }}
-            >
-              {business.name.toUpperCase()}
-            </div>
-          </div>
           <div
             style={{
               position: "relative",
               zIndex: 1,
-              marginTop: 26,
-              fontFamily: theme.fontDisplay,
-              fontSize: "clamp(28px, 4vw, 44px)",
-              lineHeight: 1.15,
-              color: business.hero_image_url ? "#ffffff" : theme.accentText,
+              maxWidth: 1040,
+              margin: "0 auto",
+              padding: `20px ${sidePad} 30px ${sidePad}`,
             }}
           >
-            Reservá tu turno
-          </div>
-        </div>
-      ) : (
-        <>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: `20px ${sidePad} 16px ${sidePad}`,
-            }}
-          >
-            <Badge business={business} theme={theme} size={34} />
-            <div style={{ fontFamily: theme.fontDisplay, fontSize: 20, fontWeight: 600, letterSpacing: "0.02em" }}>
-              {business.name}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <Badge business={business} theme={theme} size={34} />
+              <div
+                style={{
+                  fontFamily: theme.fontDisplay,
+                  fontSize: 16,
+                  color: business.hero_image_url ? "#ffffff" : theme.accentText,
+                  letterSpacing: "0.01em",
+                }}
+              >
+                {business.name.toUpperCase()}
+              </div>
             </div>
-          </div>
-          <div style={{ margin: `0 ${sidePad}` }}>
-            <Hero business={business} theme={theme} />
-          </div>
-          <div style={{ padding: `22px ${sidePad} 4px ${sidePad}` }}>
             <div
               style={{
+                marginTop: 26,
                 fontFamily: theme.fontDisplay,
-                fontSize: "clamp(30px, 3.5vw, 44px)",
-                fontWeight: 600,
+                fontSize: "clamp(28px, 4vw, 44px)",
                 lineHeight: 1.15,
+                color: business.hero_image_url ? "#ffffff" : theme.accentText,
               }}
             >
-              {business.name}
+              Reservá tu turno
             </div>
           </div>
-        </>
-      )}
-
-      {serviceList.length > 0 && (
-        <div style={{ padding: `26px ${sidePad} 0 ${sidePad}` }}>
-          <SectionLabel theme={theme}>Servicios</SectionLabel>
-          <CardGrid>
-            {serviceList.map((s) => (
-              <Card key={s.id} theme={theme}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                  <span style={{ fontSize: 15, fontWeight: 600 }}>{s.name}</span>
-                  <span style={{ fontSize: 12.5, color: theme.mutedText }}>{s.duration_minutes} min</span>
-                </div>
-                <span style={{ fontSize: 15, fontWeight: 700 }}>{formatPrice(s.price)}</span>
-              </Card>
-            ))}
-          </CardGrid>
         </div>
       )}
 
-      <div style={{ padding: `26px ${sidePad} 0 ${sidePad}` }}>
-        <SectionLabel theme={theme}>Recursos disponibles</SectionLabel>
-        {resourceList.length === 0 ? (
-          <span style={{ fontSize: 14, color: theme.mutedText }}>Todavía no hay recursos cargados.</span>
-        ) : (
-          <CardGrid>
-            {resourceList.map((r) => (
-              <Card key={r.id} theme={theme}>
-                <span style={{ fontSize: 15, fontWeight: 600 }}>{r.name}</span>
-              </Card>
-            ))}
-          </CardGrid>
-        )}
-      </div>
-
-      <div style={{ padding: `26px ${sidePad} 0 ${sidePad}` }}>
-        <SectionLabel theme={theme}>Horarios de atención</SectionLabel>
-        {hoursList.length === 0 ? (
-          <span style={{ fontSize: 14, color: theme.mutedText }}>Todavía no hay horarios cargados.</span>
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 240px))",
-              gap: "4px 24px",
-            }}
-          >
-            {hoursList.map((h) => (
-              <div key={h.id} style={{ fontSize: 14, color: theme.mutedText }}>
-                {DAY_NAMES[h.day_of_week]}: {formatTime(h.start_time)}–{formatTime(h.end_time)}
+      <main style={{ maxWidth: 1040, margin: "0 auto", paddingBottom: 48 }}>
+        {!theme.bannerLayout && (
+          <>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: `20px ${sidePad} 16px ${sidePad}`,
+              }}
+            >
+              <Badge business={business} theme={theme} size={34} />
+              <div style={{ fontFamily: theme.fontDisplay, fontSize: 20, fontWeight: 600, letterSpacing: "0.02em" }}>
+                {business.name}
               </div>
-            ))}
-          </div>
+            </div>
+            <div style={{ margin: `0 ${sidePad}` }}>
+              <Hero business={business} theme={theme} />
+            </div>
+            <div style={{ padding: `22px ${sidePad} 4px ${sidePad}` }}>
+              <div
+                style={{
+                  fontFamily: theme.fontDisplay,
+                  fontSize: "clamp(30px, 3.5vw, 44px)",
+                  fontWeight: 600,
+                  lineHeight: 1.15,
+                }}
+              >
+                {business.name}
+              </div>
+            </div>
+          </>
         )}
-      </div>
 
-      <div style={{ padding: `30px ${sidePad} 0 ${sidePad}` }}>
-        <SectionLabel theme={theme}>Reservar un turno</SectionLabel>
-        {resourceList.length === 0 ? (
-          <p style={{ fontSize: 14, color: theme.mutedText }}>
-            Este negocio todavía no tiene recursos disponibles para reservar.
-          </p>
-        ) : (
-          <div style={{ maxWidth: 420 }}>
-            <PublicAppointmentForm resources={resourceList} services={serviceList} action={action} theme={theme} />
+        {serviceList.length > 0 && (
+          <div style={{ padding: `26px ${sidePad} 0 ${sidePad}` }}>
+            <SectionLabel theme={theme}>Servicios</SectionLabel>
+            <CardGrid>
+              {serviceList.map((s) => (
+                <Card key={s.id} theme={theme}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                    <span style={{ fontSize: 15, fontWeight: 600 }}>{s.name}</span>
+                    <span style={{ fontSize: 12.5, color: theme.mutedText }}>{s.duration_minutes} min</span>
+                  </div>
+                  <span style={{ fontSize: 15, fontWeight: 700 }}>{formatPrice(s.price)}</span>
+                </Card>
+              ))}
+            </CardGrid>
           </div>
         )}
-      </div>
-    </main>
+
+        <div style={{ padding: `26px ${sidePad} 0 ${sidePad}` }}>
+          <SectionLabel theme={theme}>Recursos disponibles</SectionLabel>
+          {resourceList.length === 0 ? (
+            <span style={{ fontSize: 14, color: theme.mutedText }}>Todavía no hay recursos cargados.</span>
+          ) : (
+            <CardGrid>
+              {resourceList.map((r) => (
+                <Card key={r.id} theme={theme}>
+                  <span style={{ fontSize: 15, fontWeight: 600 }}>{r.name}</span>
+                </Card>
+              ))}
+            </CardGrid>
+          )}
+        </div>
+
+        <div style={{ padding: `26px ${sidePad} 0 ${sidePad}` }}>
+          <SectionLabel theme={theme}>Horarios de atención</SectionLabel>
+          {hoursList.length === 0 ? (
+            <span style={{ fontSize: 14, color: theme.mutedText }}>Todavía no hay horarios cargados.</span>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 240px))",
+                gap: "4px 24px",
+              }}
+            >
+              {hoursList.map((h) => (
+                <div key={h.id} style={{ fontSize: 14, color: theme.mutedText }}>
+                  {DAY_NAMES[h.day_of_week]}: {formatTime(h.start_time)}–{formatTime(h.end_time)}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div style={{ padding: `30px ${sidePad} 0 ${sidePad}` }}>
+          <SectionLabel theme={theme}>Reservar un turno</SectionLabel>
+          {resourceList.length === 0 ? (
+            <p style={{ fontSize: 14, color: theme.mutedText }}>
+              Este negocio todavía no tiene recursos disponibles para reservar.
+            </p>
+          ) : (
+            <div style={{ maxWidth: 420 }}>
+              <PublicAppointmentForm resources={resourceList} services={serviceList} action={action} theme={theme} />
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }

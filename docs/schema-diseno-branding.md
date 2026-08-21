@@ -23,7 +23,8 @@ No hizo falta tocar RLS: `businesses_select_public`/`businesses_update_own` no s
 
 Implementados en `src/app/[slug]/theme.ts` (tokens) + `src/app/[slug]/BrandedStorefront.tsx` (layout):
 
-- **`clasico`**: no pasa por el theming nuevo. `src/app/[slug]/page.tsx` bifurca *antes* de tocar cualquier token nuevo y renderiza el markup original de v0-v3 sin cambios -- la forma más segura de garantizar que un negocio existente (los 3 que ya había en la base al momento de esta tarea) no sufra ninguna regresión visual: el código que lo dibuja es literalmente el mismo que antes.
+- **`clasico`**: pasa por el mismo theming que el resto (`getStorefrontTheme`/`BrandedStorefront`) -- fondo claro neutro, tipografía `system-ui` y `brand_color` como acento sólido en la portada/badge/botón. Es el default de todo negocio nuevo, así que tiene que verse prolijo sin que el dueño configure nada más que su color de marca.
+  - **Cambio de decisión (sesión post-lanzamiento a los primeros negocios reales):** originalmente `clasico` no pasaba por este theming -- `page.tsx` bifurcaba antes y renderizaba el markup crudo de v0-v3 (sin cards, sin tipografía, fondo por default del navegador), a propósito, para garantizar cero regresión visual en los 3 negocios que ya existían al momento de crear los presets. Una vez que se empezó a mostrar el sistema a negocios reales, ese markup crudo resultó ser el problema: es el preset *default*, así que todo negocio nuevo nace con la página pública rota a menos que alguien elija explícitamente `elegante`/`deportivo`. Se resolvió dándole a `clasico` un preset real en `theme.ts` -- la garantía de "cero regresión" ya no aplicaba (los negocios reales que se iban a mostrar a prospectos necesitaban verse bien, no verse igual que un HTML sin estilos).
 - **`elegante`** (peluquería "Estilo Urbano" en el mockup aprobado): paleta oscura fija (no depende de `brand_color`), tipografía Cormorant Garamond (display) + Manrope (body) vía `next/font/google`, portada en tarjeta redondeada con monograma grande centrado si no hay `hero_image_url`.
 - **`deportivo`** (cancha "La Bombonerita F5"): banner superior en `brand_color` (con degradé), tipografía Archivo Black (display) + Barlow (body), portada = el banner mismo, con las iniciales del negocio sangrando como marca de agua si no hay `hero_image_url`.
 - **`minimal`**: sin mockup aprobado todavía. Versión liviana blanco/negro, misma tipografía que `clasico` (system-ui). No se le dedicó más tiempo que el mínimo -- ver pedido explícito del usuario.
@@ -41,6 +42,10 @@ El mockup es de dos rubros concretos (peluquería, fútbol 5) y tiene detalles d
 ## Contraste de texto sobre `brand_color`
 
 `getContrastTextColor` (`src/lib/branding.ts`) calcula luminancia relativa (fórmula WCAG) sobre el hex elegido y devuelve texto negro o blanco, el que tenga más contraste. Es necesario porque `brand_color` es 100% libre: un negocio "deportivo" podría elegir un verde clarito en vez de uno oscuro, y sin este cálculo el texto blanco fijo del botón/banner se volvería ilegible.
+
+## Layout full-bleed (fix post-lanzamiento)
+
+`BrandedStorefront.tsx` originalmente aplicaba `background: theme.pageBg` (o `theme.heroBg` en el banner de "deportivo") directo sobre el `<main>` que también tenía `maxWidth: 1040`. A 1440px de ancho de ventana eso dejaba franjas en blanco/negro (el fondo real de `<body>`) a los costados -- el color de marca no llegaba a los bordes de la pantalla. Se corrigió separando responsabilidades: un `<div>` exterior a `width: 100%` lleva el fondo (y, en "deportivo", el banner también es un `<div>` exterior a `width: 100%` con su propio `maxWidth` interno solo para el texto/badge), y el contenido (cards, formulario, texto) queda en un `<main>` interior con `maxWidth: 1040, margin: "0 auto"` -- mismo patrón en la home (`src/app/page.tsx`).
 
 ## Los 2 negocios de demo
 

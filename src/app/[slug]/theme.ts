@@ -6,13 +6,9 @@ import { cormorantGaramond, manrope, archivoBlack, barlow } from "./fonts";
  * varía libremente; todo lo demás lo fija el preset -- ver el requisito en
  * AGENTS.md: "brand_color es el único color libre que elige el negocio; el
  * preset define todo lo demás".
- *
- * "clasico" no genera tokens acá: la página lo renderiza con el markup
- * original de v0-v3, sin pasar por este theming, para garantizar que un
- * negocio existente (sin preset explícito) se siga viendo exactamente igual.
  */
 export type StorefrontTheme = {
-  preset: Exclude<BrandStylePreset, "clasico">;
+  preset: BrandStylePreset;
   fontDisplay: string;
   fontBody: string;
   pageBg: string;
@@ -27,11 +23,31 @@ export type StorefrontTheme = {
   bannerLayout: boolean;
 };
 
-export function getStorefrontTheme(
-  preset: Exclude<BrandStylePreset, "clasico">,
-  brandColor: string
-): StorefrontTheme {
+export function getStorefrontTheme(preset: BrandStylePreset, brandColor: string): StorefrontTheme {
   const accentText = getContrastTextColor(brandColor);
+
+  if (preset === "clasico") {
+    // Default de todo negocio nuevo -- tiene que verse prolijo sin que el
+    // dueño configure nada más que su brand_color. Fondo claro neutro (no
+    // depende del preset del rubro) con el color de marca como acento sólido
+    // en la portada, mismo patrón que "elegante"/"deportivo" pero sin
+    // tipografía custom ni layout de banner.
+    return {
+      preset,
+      fontDisplay: "system-ui, sans-serif",
+      fontBody: "system-ui, sans-serif",
+      pageBg: "#ffffff",
+      pageText: "#171717",
+      mutedText: "#666666",
+      cardBg: "#f7f7f8",
+      cardBorder: "#e5e7eb",
+      accent: brandColor,
+      accentText,
+      heroBg: brandColor,
+      heroMonogramColor: accentText,
+      bannerLayout: false,
+    };
+  }
 
   if (preset === "elegante") {
     return {

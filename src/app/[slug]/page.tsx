@@ -1,33 +1,13 @@
 import { supabase } from "@/lib/supabaseClient";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import PublicAppointmentForm from "./PublicAppointmentForm";
 import BrandedStorefront from "./BrandedStorefront";
 import { getStorefrontTheme } from "./theme";
 import { localInputToInstant, getLocalDateParts, addMinutesToInstant } from "@/lib/datetime";
 
-const DAY_NAMES = [
-  "Domingo",
-  "Lunes",
-  "Martes",
-  "Miércoles",
-  "Jueves",
-  "Viernes",
-  "Sábado",
-];
-
-function formatTime(t: string) {
-  return t.slice(0, 5);
-}
-
 function timeStringToMinutes(t: string) {
   const [hours, minutes] = t.split(":").map(Number);
   return hours * 60 + minutes;
-}
-
-function formatPrice(p: number | string) {
-  // Postgres numeric puede llegar como string vía PostgREST (evita perder precisión en JS).
-  return Number(p).toLocaleString("es-AR", { style: "currency", currency: "ARS" });
 }
 
 type PublicAppointmentFormState = { error: string | null; success: boolean };
@@ -205,76 +185,18 @@ export default async function BusinessPage({ params }: PageProps<"/[slug]">) {
     return { error: null, success: true };
   }
 
-  // "clasico" (default de todo negocio existente) sigue el markup original de
-  // v0-v3 sin cambios, para garantizar cero regresión visual. El resto de los
-  // presets pasa por el theming nuevo en BrandedStorefront -- ver AGENTS.md
-  // "branding por negocio" y src/app/[slug]/theme.ts.
-  if (business.brand_style_preset !== "clasico") {
-    const theme = getStorefrontTheme(business.brand_style_preset, business.brand_color);
-    return (
-      <BrandedStorefront
-        business={business}
-        theme={theme}
-        resourceList={resourceList}
-        hoursList={hoursList}
-        serviceList={serviceList}
-        action={addPublicAppointment}
-      />
-    );
-  }
-
+  // Todos los presets, incluido "clasico" (default de todo negocio nuevo),
+  // pasan por el mismo theming -- ver src/app/[slug]/theme.ts y
+  // docs/schema-diseno-branding.md.
+  const theme = getStorefrontTheme(business.brand_style_preset, business.brand_color);
   return (
-    <main
-      style={{
-        maxWidth: 640,
-        margin: "40px auto",
-        fontFamily: "system-ui, sans-serif",
-        padding: "0 16px",
-      }}
-    >
-      <h1>{business.name}</h1>
-
-      <h2>Recursos disponibles</h2>
-      <ul>
-        {resourceList.map((r) => (
-          <li key={r.id}>{r.name}</li>
-        ))}
-        {resourceList.length === 0 && <li>Todavía no hay recursos cargados.</li>}
-      </ul>
-
-      <h2>Horarios de atención</h2>
-      <ul>
-        {hoursList.map((h) => (
-          <li key={h.id}>
-            {DAY_NAMES[h.day_of_week]}: {formatTime(h.start_time)}–{formatTime(h.end_time)}
-          </li>
-        ))}
-        {hoursList.length === 0 && <li>Todavía no hay horarios cargados.</li>}
-      </ul>
-
-      {serviceList.length > 0 && (
-        <>
-          <h2>Servicios</h2>
-          <ul>
-            {serviceList.map((s) => (
-              <li key={s.id}>
-                {s.name} — {s.duration_minutes} min — {formatPrice(s.price)}
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-
-      <h2>Reservar un turno</h2>
-      {resourceList.length === 0 ? (
-        <p>Este negocio todavía no tiene recursos disponibles para reservar.</p>
-      ) : (
-        <PublicAppointmentForm
-          resources={resourceList}
-          services={serviceList}
-          action={addPublicAppointment}
-        />
-      )}
-    </main>
+    <BrandedStorefront
+      business={business}
+      theme={theme}
+      resourceList={resourceList}
+      hoursList={hoursList}
+      serviceList={serviceList}
+      action={addPublicAppointment}
+    />
   );
 }

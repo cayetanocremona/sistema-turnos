@@ -25,8 +25,7 @@ export default function PublicAppointmentForm({
     prevState: PublicAppointmentFormState,
     formData: FormData
   ) => Promise<PublicAppointmentFormState>;
-  // Sin theme (preset "clasico"): estilos inline planos originales, sin cambios.
-  theme?: StorefrontTheme;
+  theme: StorefrontTheme;
 }) {
   const [state, formAction, isPending] = useActionState(action, {
     error: null,
@@ -35,35 +34,35 @@ export default function PublicAppointmentForm({
 
   const hasServices = services.length > 0;
 
-  const fieldStyle: CSSProperties = theme
-    ? {
-        padding: 10,
-        borderRadius: 8,
-        border: `1px solid ${theme.cardBorder}`,
-        background: theme.cardBg,
-        color: theme.pageText,
-        fontFamily: theme.fontBody,
-        fontSize: 14,
-      }
-    : { padding: 8 };
+  const fieldStyle: CSSProperties = {
+    padding: 10,
+    borderRadius: 8,
+    border: `1px solid ${theme.cardBorder}`,
+    background: theme.cardBg,
+    color: theme.pageText,
+    fontFamily: theme.fontBody,
+    fontSize: 14,
+  };
 
-  const labelStyle: CSSProperties = theme
-    ? { fontSize: 13, color: theme.mutedText, display: "flex", flexDirection: "column", gap: 4 }
-    : { fontSize: 14, color: "#666", display: "flex", flexDirection: "column", gap: 4 };
+  const labelStyle: CSSProperties = {
+    fontSize: 13,
+    color: theme.mutedText,
+    display: "flex",
+    flexDirection: "column",
+    gap: 4,
+  };
 
-  const buttonStyle: CSSProperties = theme
-    ? {
-        padding: 13,
-        borderRadius: 10,
-        border: "none",
-        background: theme.accent,
-        color: theme.accentText,
-        fontFamily: theme.fontBody,
-        fontSize: 14.5,
-        fontWeight: 700,
-        cursor: "pointer",
-      }
-    : { padding: 8, cursor: "pointer" };
+  const buttonStyle: CSSProperties = {
+    padding: 13,
+    borderRadius: 10,
+    border: "none",
+    background: theme.accent,
+    color: theme.accentText,
+    fontFamily: theme.fontBody,
+    fontSize: 14.5,
+    fontWeight: 700,
+    cursor: "pointer",
+  };
 
   return (
     <form
@@ -112,8 +111,8 @@ export default function PublicAppointmentForm({
         {isPending ? "Reservando..." : "Reservar turno"}
       </button>
 
-      {state.error && <p style={{ color: theme ? "#e5484d" : "red" }}>{state.error}</p>}
-      {state.success && <p style={{ color: theme ? "#30a46c" : "green" }}>¡Turno reservado con éxito!</p>}
+      {state.error && <p style={{ color: "#e5484d" }}>{state.error}</p>}
+      {state.success && <p style={{ color: "#30a46c" }}>¡Turno reservado con éxito!</p>}
     </form>
   );
 }
