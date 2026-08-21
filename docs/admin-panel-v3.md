@@ -43,7 +43,7 @@ Ya estaban separadas en funciones individuales (`addResource`, `addService`, etc
 única; acá simplemente se juntan en un módulo aparte en vez de duplicarlas. Cada página importa
 solo la acción que usa. La lógica de autorización (verificar `owner_id = auth.uid()` antes de
 insertar) no cambió — sigue siendo defensa en profundidad además de RLS, no en reemplazo: si se
-rompiera esta verificación en el código, las policies de `supabase/migrations/004_rls_v2.sql`
+rompiera esta verificación en el código, las policies de `supabase/migrations/005_rls_v2.sql`
 igual bloquean el insert en la base.
 
 ## Decisión de alcance: selector de negocio por formulario, no contexto global

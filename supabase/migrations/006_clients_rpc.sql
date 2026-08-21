@@ -6,14 +6,14 @@
 --
 -- 1) Quedó una policy `temp_open_write_pending_auth` en businesses/resources/
 --    business_hours de antes de v2 (escritura pública sin condición) que las
---    policies por dueño de 004_rls_v2.sql no anulaban — RLS combina policies
+--    policies por dueño de 005_rls_v2.sql no anulaban — RLS combina policies
 --    permisivas con OR, así que una sola policy abierta las volvía inútiles a
 --    todas. Se eliminó.
 --
 -- 2) `clients` ya no tiene ninguna policy pública (ni lectura ni escritura).
 --    Antes cualquiera con la anon key podía leer nombre/teléfono/email de todos
 --    los clientes de la plataforma (limitación que quedó documentada en
---    004_rls_v2.sql). En su lugar: lectura restringida a "clientes que tuvieron
+--    005_rls_v2.sql). En su lugar: lectura restringida a "clientes que tuvieron
 --    un turno en un negocio del dueño logueado", y toda alta/búsqueda de cliente
 --    por teléfono pasa por una función `security definer` que sortea RLS
 --    deliberadamente (por diseño, ver advisors de Supabase: es two warnings
