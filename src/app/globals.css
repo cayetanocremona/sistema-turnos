@@ -1,6 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * Sistema visual (fase 1, ver AGENTS.md "Sistema visual"). Un solo punto de
+ * personalización por negocio -- --brand-accent, mapeado desde
+ * businesses.brand_color -- todo lo demás (tipografía, radios) es fijo y lo
+ * comparten home, /[slug]/owner y el preset "clasico" (default) de /[slug].
+ * Variables CSS reales (no tokens de @theme) para que cualquier subárbol
+ * pueda pisarlas por `style` -- el storefront default usa el brand_color
+ * real del negocio, /[slug]/owner usa un acento fijo propio (no theming por
+ * negocio, ver AGENTS.md "Estilo genérico del panel"), y acá quedan como
+ * default neutro para todo lo demás (home, /admin).
+ */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --brand-accent: #16171a;
+  --brand-accent-contrast: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,7 +45,7 @@ body {
   flex-direction: column;
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

@@ -1,41 +1,67 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getMyBusinesses } from "./data";
+import { addBusiness } from "./actions";
+import BusinessForm from "./BusinessForm";
+import Card from "@/components/ui/Card";
 
-export default async function AdminDashboard() {
+/**
+ * Punto de entrada "cross-negocio" para el dueño: crear un negocio nuevo, o
+ * elegir a cuál de los suyos entrar. La gestión de un negocio puntual vive en
+ * /[slug]/owner (ver AGENTS.md "Refactor de rutas") -- acá solo se resuelve
+ * "a cuál entro" antes de llegar ahí. Con un solo negocio no auto-redirige:
+ * si redirigiera directo a /{slug}/owner, un dueño con un solo negocio nunca
+ * podría volver acá para cargar un segundo.
+ */
+export default async function AdminSwitcher() {
   const supabaseServer = await createClient();
   const {
     data: { user },
   } = await supabaseServer.auth.getUser();
 
-  const { data: businesses } = await getMyBusinesses(supabaseServer, user!.id);
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: businesses, error } = await supabaseServer
+    .from("businesses")
+    .select("*")
+    .eq("owner_id", user.id)
+    .order("created_at", { ascending: false });
+
   const businessList = businesses ?? [];
 
   return (
-    <div>
-      <h1>Resumen</h1>
-
-      {businessList.length === 0 ? (
-        <p>
-          Todavía no tenés negocios propios. Creá el primero en{" "}
-          <Link href="/admin/businesses">Negocios</Link>.
+    <div className="mx-auto flex min-h-screen max-w-2xl flex-col gap-8 px-4 py-14 sm:px-6">
+      <div>
+        <h1 className="text-2xl font-extrabold text-neutral-900">Tus negocios</h1>
+        <p className="mt-1 text-sm text-neutral-500">
+          Elegí un negocio para administrarlo, o cargá uno nuevo.
         </p>
-      ) : (
-        <>
-          <p style={{ color: "#666" }}>Tus negocios:</p>
-          <ul>
-            {businessList.map((b) => (
-              <li key={b.id}>
-                {b.name} — <Link href={`/${b.slug}`}>/{b.slug}</Link>
-              </li>
-            ))}
-          </ul>
-        </>
+      </div>
+
+      {error && <p className="text-sm font-medium text-rose-600">Error: {error.message}</p>}
+
+      {businessList.length > 0 && (
+        <div className="flex flex-col gap-3">
+          {businessList.map((b) => (
+            <Link key={b.id} href={`/${b.slug}/owner`}>
+              <Card className="flex items-center justify-between p-5 transition-shadow hover:shadow-md">
+                <div>
+                  <div className="font-semibold text-neutral-900">{b.name}</div>
+                  <div className="text-xs text-neutral-500">/{b.slug}</div>
+                </div>
+                <span className="text-sm font-semibold text-[var(--brand-accent)]">Administrar →</span>
+              </Card>
+            </Link>
+          ))}
+        </div>
       )}
 
-      <p style={{ color: "#666", marginTop: 24 }}>
-        Usá la barra de arriba para gestionar recursos, servicios, horarios, bloqueos y turnos.
-      </p>
+      <Card className="p-5">
+        <h2 className="mb-3 text-sm font-bold text-neutral-900">Crear un negocio nuevo</h2>
+        <BusinessForm action={addBusiness} />
+      </Card>
     </div>
   );
 }

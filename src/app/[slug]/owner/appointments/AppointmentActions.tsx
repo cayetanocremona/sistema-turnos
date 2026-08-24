@@ -3,8 +3,9 @@
 import { useActionState, useState } from "react";
 import type { AppointmentMutationState } from "../actions";
 import { instantToLocalInputValue } from "@/lib/datetime";
+import Button from "@/components/ui/Button";
 
-type Resource = { id: string; business_id: string; name: string };
+type Resource = { id: string; name: string };
 
 type MutationAction = (
   prevState: AppointmentMutationState,
@@ -14,7 +15,7 @@ type MutationAction = (
 export default function AppointmentActions({
   appointmentId,
   status,
-  businessId,
+  slug,
   resourceId,
   startTime,
   timezone,
@@ -24,7 +25,7 @@ export default function AppointmentActions({
 }: {
   appointmentId: string;
   status: string;
-  businessId: string;
+  slug: string;
   resourceId: string;
   startTime: string;
   timezone: string;
@@ -42,14 +43,12 @@ export default function AppointmentActions({
   );
 
   if (status === "cancelled") {
-    return <span style={{ color: "#999", fontSize: 14 }}>Cancelado</span>;
+    return <span className="text-xs text-neutral-400">—</span>;
   }
 
-  const filteredResources = resources.filter((r) => r.business_id === businessId);
-
   return (
-    <span style={{ display: "inline-flex", flexDirection: "column", gap: 6 }}>
-      <span style={{ display: "inline-flex", gap: 8 }}>
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
         <form
           action={cancelFormAction}
           onSubmit={(e) => {
@@ -59,31 +58,30 @@ export default function AppointmentActions({
           }}
         >
           <input type="hidden" name="appointment_id" value={appointmentId} />
-          <button type="submit" disabled={isCancelling} style={{ cursor: "pointer" }}>
+          <input type="hidden" name="slug" value={slug} />
+          <Button type="submit" disabled={isCancelling} variant="outline" size="sm" className="border-rose-200 text-rose-600 hover:bg-rose-50">
             {isCancelling ? "Cancelando..." : "Cancelar"}
-          </button>
+          </Button>
         </form>
 
-        <button
-          type="button"
-          onClick={() => setIsRescheduling((v) => !v)}
-          style={{ cursor: "pointer" }}
-        >
+        <Button type="button" variant="outline" size="sm" onClick={() => setIsRescheduling((v) => !v)}>
           {isRescheduling ? "Cerrar" : "Reagendar"}
-        </button>
-      </span>
+        </Button>
+      </div>
 
-      {cancelState.error && <p style={{ color: "red", fontSize: 13, margin: 0 }}>{cancelState.error}</p>}
+      {cancelState.error && <p className="text-xs font-medium text-rose-600">{cancelState.error}</p>}
 
       {isRescheduling && (
-        <form
-          action={rescheduleFormAction}
-          style={{ display: "flex", flexDirection: "column", gap: 6, padding: 8, background: "#f5f5f5" }}
-        >
+        <form action={rescheduleFormAction} className="flex flex-col gap-2 rounded-xl border border-black/10 p-3">
           <input type="hidden" name="appointment_id" value={appointmentId} />
+          <input type="hidden" name="slug" value={slug} />
 
-          <select name="resource_id" defaultValue={resourceId} style={{ padding: 6 }}>
-            {filteredResources.map((r) => (
+          <select
+            name="resource_id"
+            defaultValue={resourceId}
+            className="rounded-lg border border-black/10 px-2.5 py-1.5 text-xs outline-none focus:border-[var(--brand-accent)]"
+          >
+            {resources.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.name}
               </option>
@@ -95,18 +93,18 @@ export default function AppointmentActions({
             type="datetime-local"
             required
             defaultValue={instantToLocalInputValue(startTime, timezone)}
-            style={{ padding: 6 }}
+            className="rounded-lg border border-black/10 px-2.5 py-1.5 text-xs outline-none focus:border-[var(--brand-accent)]"
           />
 
-          <button type="submit" disabled={isSubmittingReschedule} style={{ cursor: "pointer" }}>
+          <Button type="submit" disabled={isSubmittingReschedule} size="sm">
             {isSubmittingReschedule ? "Guardando..." : "Confirmar nuevo horario"}
-          </button>
+          </Button>
 
           {rescheduleState.error && (
-            <p style={{ color: "red", fontSize: 13, margin: 0 }}>{rescheduleState.error}</p>
+            <p className="text-xs font-medium text-rose-600">{rescheduleState.error}</p>
           )}
         </form>
       )}
-    </span>
+    </div>
   );
 }

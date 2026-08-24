@@ -1,7 +1,9 @@
 import { supabase } from "@/lib/supabaseClient";
 import { notFound } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { resolveTenant } from "@/lib/tenant";
 import BrandedStorefront from "./BrandedStorefront";
+import DefaultStorefront from "./DefaultStorefront";
 import { getStorefrontTheme } from "./theme";
 import { localInputToInstant, getLocalDateParts, addMinutesToInstant } from "@/lib/datetime";
 
@@ -15,11 +17,7 @@ type PublicAppointmentFormState = { error: string | null; success: boolean };
 export default async function BusinessPage({ params }: PageProps<"/[slug]">) {
   const { slug } = await params;
 
-  const { data: business } = await supabase
-    .from("businesses")
-    .select("*")
-    .eq("slug", slug)
-    .maybeSingle();
+  const business = await resolveTenant(supabase, slug);
 
   if (!business) {
     notFound();
@@ -185,9 +183,22 @@ export default async function BusinessPage({ params }: PageProps<"/[slug]">) {
     return { error: null, success: true };
   }
 
-  // Todos los presets, incluido "clasico" (default de todo negocio nuevo),
-  // pasan por el mismo theming -- ver src/app/[slug]/theme.ts y
-  // docs/schema-diseno-branding.md.
+  // "clasico" (default de todo negocio nuevo) usa el sistema visual nuevo
+  // (Tailwind + componentes reutilizables, ver AGENTS.md "Sistema visual").
+  // "elegante"/"deportivo"/"minimal" siguen con su theming propio en
+  // BrandedStorefront/theme.ts, sin tocar.
+  if (business.brand_style_preset === "clasico") {
+    return (
+      <DefaultStorefront
+        business={business}
+        resourceList={resourceList}
+        hoursList={hoursList}
+        serviceList={serviceList}
+        action={addPublicAppointment}
+      />
+    );
+  }
+
   const theme = getStorefrontTheme(business.brand_style_preset, business.brand_color);
   return (
     <BrandedStorefront

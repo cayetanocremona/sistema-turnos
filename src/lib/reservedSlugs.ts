@@ -1,9 +1,11 @@
 export const RESERVED_SLUGS = [
   "admin",
+  "owner",
   "login",
   "logout",
   "signup",
   "register",
+  "pricing",
   "api",
   "dev",
   "docs",
@@ -25,12 +27,14 @@ export const RESERVED_SLUGS = [
   "support",
   "soporte",
   "static",
+  "assets",
   "public",
   "www",
   "auth",
   "new",
   "edit",
   "delete",
+  "403",
 ];
 
 export function isReservedSlug(slug: string): boolean {

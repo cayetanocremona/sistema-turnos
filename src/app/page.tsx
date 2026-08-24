@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { revalidatePath } from "next/cache";
+import Card from "@/components/ui/Card";
+import { buttonClassName } from "@/components/ui/Button";
 
 const STEPS = [
   {
@@ -17,139 +18,103 @@ const STEPS = [
   },
 ];
 
-async function signOut() {
-  "use server";
+export default async function Home({ searchParams }: PageProps<"/">) {
+  const { q } = await searchParams;
+  const query = typeof q === "string" ? q.trim() : "";
 
-  const supabaseServer = await createClient();
-  await supabaseServer.auth.signOut();
-  revalidatePath("/", "layout");
-}
-
-export default async function Home() {
   const supabaseServer = await createClient();
   const {
     data: { user },
   } = await supabaseServer.auth.getUser();
 
+  // Búsqueda puntual por lo que el usuario tipeó -- nunca se lista el
+  // catálogo completo de negocios acá (eso exponía datos de prueba, ver
+  // AGENTS.md "Sistema visual").
+  const results =
+    query.length > 0
+      ? (
+          await supabaseServer
+            .from("businesses")
+            .select("name, slug")
+            .ilike("name", `%${query}%`)
+            .limit(5)
+        ).data ?? []
+      : [];
+
   const primaryCta = user
-    ? { href: "/admin", label: "Ir al panel" }
+    ? { href: "/admin", label: "Ir a mis negocios" }
     : { href: "/login", label: "Iniciar sesión como dueño de negocio" };
 
   return (
-    <div style={{ width: "100%", fontFamily: "system-ui, sans-serif" }}>
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          maxWidth: 1040,
-          margin: "0 auto",
-          padding: "20px clamp(20px, 4vw, 56px)",
-        }}
-      >
-        <span style={{ fontWeight: 700, fontSize: 17 }}>Sistema de Turnos</span>
-        {user ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 14 }}>
-            <span style={{ color: "#666" }}>{user.email}</span>
-            <Link href="/admin">Panel</Link>
-            <form action={signOut}>
-              <button
-                type="submit"
-                style={{
-                  padding: "6px 10px",
-                  cursor: "pointer",
-                  border: "1px solid #ddd",
-                  borderRadius: 6,
-                  background: "#fff",
-                  fontSize: 14,
-                }}
-              >
-                Cerrar sesión
-              </button>
-            </form>
-          </div>
-        ) : (
-          <Link href="/login" style={{ fontSize: 14, fontWeight: 600 }}>
-            Iniciar sesión
-          </Link>
-        )}
+    <div className="flex w-full flex-col bg-white text-neutral-900">
+      <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-6 sm:px-6">
+        <span className="text-base font-extrabold">Sistema de Turnos</span>
+        <Link href={user ? "/admin" : "/login"} className="text-sm font-semibold text-neutral-600 hover:text-neutral-900">
+          {user ? "Mis negocios" : "Iniciar sesión"}
+        </Link>
       </header>
 
-      <section style={{ width: "100%", background: "#111827", color: "#fff" }}>
-        <div
-          style={{
-            maxWidth: 1040,
-            margin: "0 auto",
-            padding: "72px clamp(20px, 4vw, 56px) 88px",
-          }}
-        >
-          <h1 style={{ fontSize: "clamp(32px, 5vw, 52px)", lineHeight: 1.15, maxWidth: 680 }}>
-            Gestioná los turnos de tu negocio, sin vueltas.
-          </h1>
-          <p style={{ fontSize: 18, color: "#b8bfcc", maxWidth: 560, marginTop: 18 }}>
-            Un panel para administrar tu negocio y una página pública para que tus clientes
-            reserven online — canchas, clínicas, salones, consultorios: sirve para cualquier
-            rubro que trabaje con turnos.
-          </p>
-          <Link
-            href={primaryCta.href}
-            style={{
-              display: "inline-block",
-              marginTop: 32,
-              padding: "13px 22px",
-              borderRadius: 10,
-              background: "#fff",
-              color: "#111827",
-              fontWeight: 700,
-              fontSize: 15,
-            }}
+      <section className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-4 py-16 text-center sm:px-6 sm:py-24">
+        <h1 className="text-4xl font-extrabold leading-tight sm:text-6xl">
+          Gestioná los turnos de tu negocio, sin vueltas.
+        </h1>
+        <p className="max-w-xl text-lg text-neutral-500">
+          Un panel para administrar tu negocio y una página pública para que tus clientes
+          reserven online — canchas, clínicas, salones, consultorios: sirve para cualquier
+          rubro que trabaje con turnos.
+        </p>
+
+        <form action="/" className="flex w-full max-w-md gap-2">
+          <input
+            type="text"
+            name="q"
+            defaultValue={query}
+            placeholder="Buscá tu negocio por nombre"
+            className="flex-1 rounded-full border border-black/10 px-5 py-3 text-sm outline-none focus:border-neutral-900"
+          />
+          <button
+            type="submit"
+            className="rounded-full bg-neutral-900 px-5 py-3 text-sm font-semibold text-white hover:opacity-90"
           >
-            {primaryCta.label}
-          </Link>
-        </div>
+            Buscar
+          </button>
+        </form>
+
+        {query.length > 0 && (
+          <div className="flex w-full max-w-md flex-col gap-2 text-left">
+            {results.length === 0 ? (
+              <p className="text-sm text-neutral-400">No encontramos ningún negocio con ese nombre.</p>
+            ) : (
+              results.map((b) => (
+                <Link key={b.slug} href={`/${b.slug}`}>
+                  <Card className="px-4 py-3 text-sm font-semibold text-neutral-800 hover:shadow-sm">
+                    {b.name}
+                  </Card>
+                </Link>
+              ))
+            )}
+          </div>
+        )}
+
+        <Link href={primaryCta.href} className={buttonClassName("solid", "md", "mt-2 px-7 py-3.5 text-base")}>
+          {primaryCta.label}
+        </Link>
       </section>
 
-      <section style={{ maxWidth: 1040, margin: "0 auto", padding: "56px clamp(20px, 4vw, 56px)" }}>
-        <h2 style={{ fontSize: 22, marginBottom: 28 }}>Cómo funciona</h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: 24,
-          }}
-        >
+      <section className="mx-auto w-full max-w-5xl px-4 pb-20 sm:px-6">
+        <h2 className="mb-6 text-xl font-extrabold">Cómo funciona</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {STEPS.map((step) => (
-            <div
-              key={step.title}
-              style={{
-                padding: 20,
-                borderRadius: 12,
-                border: "1px solid #e5e7eb",
-                background: "#fafafa",
-              }}
-            >
-              <h3 style={{ fontSize: 16, marginBottom: 8 }}>{step.title}</h3>
-              <p style={{ fontSize: 14, color: "#666", lineHeight: 1.5 }}>{step.body}</p>
-            </div>
+            <Card key={step.title} className="p-5">
+              <h3 className="mb-2 text-base font-bold text-neutral-900">{step.title}</h3>
+              <p className="text-sm leading-relaxed text-neutral-500">{step.body}</p>
+            </Card>
           ))}
         </div>
-        <p style={{ fontSize: 14, color: "#888", marginTop: 32 }}>
-          ¿Ya tenés turno en un negocio que usa este sistema? Pedile a ese negocio el link
-          directo a su página de reservas.
-        </p>
       </section>
 
-      <footer style={{ width: "100%", borderTop: "1px solid #e5e7eb" }}>
-        <div
-          style={{
-            maxWidth: 1040,
-            margin: "0 auto",
-            padding: "20px clamp(20px, 4vw, 56px)",
-            fontSize: 13,
-            color: "#999",
-          }}
-        >
+      <footer className="w-full border-t border-black/[0.06]">
+        <div className="mx-auto max-w-5xl px-4 py-6 text-xs text-neutral-400 sm:px-6">
           Sistema de Gestión de Turnos — hecho para negocios de cualquier rubro.
         </div>
       </footer>
