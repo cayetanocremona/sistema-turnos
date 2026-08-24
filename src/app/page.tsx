@@ -46,7 +46,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     : { href: "/login", label: "Iniciar sesión como dueño de negocio" };
 
   return (
-    <div className="flex w-full flex-col bg-white text-neutral-900">
+    <div className="flex min-h-screen w-full flex-col bg-white text-neutral-900">
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-6 sm:px-6">
         <span className="text-base font-extrabold">Sistema de Turnos</span>
         <Link href={user ? "/admin" : "/login"} className="text-sm font-semibold text-neutral-600 hover:text-neutral-900">
