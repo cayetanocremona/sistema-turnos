@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedTenant } from "./data";
+import { getContrastTextColor } from "@/lib/branding";
 import OwnerNav from "./OwnerNav";
 
 export default async function OwnerLayout({
@@ -29,13 +30,20 @@ export default async function OwnerLayout({
   }
 
   return (
-    // El panel no toma brand_color del negocio -- ver AGENTS.md "Estilo
-    // genérico del panel": un mismo dueño administra negocios con presets
-    // distintos desde el mismo panel, así que el acento queda fijo acá
-    // (--brand-accent) en vez de heredar el color de marca de este negocio.
+    // El panel usa el brand_color real de este negocio, igual que el
+    // storefront público -- reemplaza al acento fijo (#2563eb) que tenía
+    // antes (ver AGENTS.md "Estilo genérico del panel" para el criterio
+    // viejo). Como el layout resuelve `business` a partir del slug de la URL
+    // actual, cada panel siempre refleja el negocio que corresponde a esa
+    // URL, sin importar cuántos negocios tenga el dueño logueado.
     <div
       className="flex min-h-screen flex-col bg-neutral-50 md:flex-row"
-      style={{ "--brand-accent": "#2563eb", "--brand-accent-contrast": "#ffffff" } as React.CSSProperties}
+      style={
+        {
+          "--brand-accent": business.brand_color,
+          "--brand-accent-contrast": getContrastTextColor(business.brand_color),
+        } as React.CSSProperties
+      }
     >
       <OwnerNav slug={slug} businessName={business.name} email={user.email ?? ""} />
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 md:py-10">
