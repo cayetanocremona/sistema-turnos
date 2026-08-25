@@ -18,7 +18,7 @@ export default function Pill({
 }: HTMLAttributes<HTMLSpanElement> & { variant?: PillVariant }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${VARIANT_CLASSES[variant]} ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition-colors duration-200 ${VARIANT_CLASSES[variant]} ${className}`}
       {...props}
     />
   );

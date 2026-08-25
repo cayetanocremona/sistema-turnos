@@ -18,6 +18,9 @@ function formatPrice(p: number | string) {
 type Business = {
   id: string;
   name: string;
+  timezone: string;
+  slot_interval_minutes: number;
+  booking_window_days: number;
   brand_color: string;
   logo_url: string | null;
   hero_image_url: string | null;
@@ -62,7 +65,16 @@ export default function DefaultStorefront({
           Este negocio todavía no tiene recursos disponibles para reservar.
         </p>
       ) : (
-        <DefaultAppointmentForm resources={resourceList} services={serviceList} action={action} />
+        <DefaultAppointmentForm
+          businessId={business.id}
+          resources={resourceList}
+          services={serviceList}
+          hoursList={hoursList}
+          timezone={business.timezone}
+          slotIntervalMinutes={business.slot_interval_minutes}
+          bookingWindowDays={business.booking_window_days}
+          action={action}
+        />
       )}
     </>
   );
@@ -76,7 +88,7 @@ export default function DefaultStorefront({
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
           <div className="flex-1">
             {/* Hero */}
-            <div className="relative overflow-hidden rounded-[26px] bg-[var(--brand-accent)]">
+            <div className="relative animate-fade-in-up overflow-hidden rounded-[26px] bg-[var(--brand-accent)]">
               {business.hero_image_url && (
                 <div
                   className="absolute inset-0 bg-cover bg-center opacity-40"
@@ -117,8 +129,12 @@ export default function DefaultStorefront({
               <div className="mt-8">
                 <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-neutral-500">Servicios</h2>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {serviceList.map((s) => (
-                    <Card key={s.id} className="flex items-center justify-between p-4">
+                  {serviceList.map((s, i) => (
+                    <Card
+                      key={s.id}
+                      className="flex animate-fade-in-up items-center justify-between p-4"
+                      style={{ animationDelay: `${i * 60}ms` }}
+                    >
                       <div>
                         <div className="text-sm font-semibold text-neutral-900">{s.name}</div>
                         <div className="text-xs text-neutral-500">{s.duration_minutes} min</div>
@@ -167,12 +183,12 @@ export default function DefaultStorefront({
 
             {/* En mobile la card de reserva va acá, en el flujo normal (no sticky, no hace falta). */}
             <div className="mt-8 lg:hidden">
-              <Card className="p-6">{bookingForm}</Card>
+              <Card className="animate-fade-in-up p-6">{bookingForm}</Card>
             </div>
           </div>
 
           <div className="hidden w-[360px] shrink-0 lg:block">
-            <StickyBookingCard>{bookingForm}</StickyBookingCard>
+            <StickyBookingCard className="animate-fade-in-up">{bookingForm}</StickyBookingCard>
           </div>
         </div>
       </div>

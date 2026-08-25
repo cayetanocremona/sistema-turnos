@@ -51,7 +51,7 @@ export default async function OwnerDashboard({ params }: PageProps<"/[slug]/owne
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {stats.map((stat) => (
           <Link key={stat.label} href={stat.href}>
-            <Card className="p-5 transition-shadow hover:shadow-md">
+            <Card className="p-5 hover:-translate-y-0.5 hover:shadow-md">
               <div className="text-3xl font-extrabold text-neutral-900">{stat.value}</div>
               <div className="mt-1 text-sm font-medium text-neutral-500">{stat.label}</div>
             </Card>

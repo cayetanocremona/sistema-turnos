@@ -54,7 +54,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         </Link>
       </header>
 
-      <section className="mx-auto flex w-full max-w-3xl flex-col items-center gap-6 px-4 py-16 text-center sm:px-6 sm:py-24">
+      <section className="mx-auto flex w-full max-w-3xl animate-fade-in-up flex-col items-center gap-6 px-4 py-16 text-center sm:px-6 sm:py-24">
         <h1 className="text-4xl font-extrabold leading-tight sm:text-6xl">
           Gestioná los turnos de tu negocio, sin vueltas.
         </h1>
@@ -87,7 +87,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             ) : (
               results.map((b) => (
                 <Link key={b.slug} href={`/${b.slug}`}>
-                  <Card className="px-4 py-3 text-sm font-semibold text-neutral-800 hover:shadow-sm">
+                  <Card className="px-4 py-3 text-sm font-semibold text-neutral-800 hover:-translate-y-0.5 hover:shadow-md">
                     {b.name}
                   </Card>
                 </Link>

@@ -79,3 +79,38 @@ export function getLocalDateParts(date: Date, timeZone: string): { dayOfWeek: nu
     timeMinutes: Number(parts.hour) * 60 + Number(parts.minute),
   };
 }
+
+/** Fecha local ("YYYY-MM-DD") de un instante en la zona horaria dada -- para comparar fechas de calendario sin arrastrar hora/offset. */
+export function getLocalDateString(instant: string | Date, timeZone: string): string {
+  const date = typeof instant === "string" ? new Date(instant) : instant;
+  return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+}
+
+/** Fecha local ("YYYY-MM-DD") de "ahora" en la zona horaria del negocio -- punto de partida de la ventana de reserva (`booking_window_days`) y del selector de fecha/hora. */
+export function getTodayDateString(timeZone: string): string {
+  return getLocalDateString(new Date(), timeZone);
+}
+
+/** Suma días de calendario a una fecha "YYYY-MM-DD" (aritmética pura en UTC, no interpreta la fecha en ninguna zona horaria) -- para generar la tira de días de la ventana de reserva. */
+export function addDaysToDateString(dateString: string, days: number): string {
+  const [y, m, d] = dateString.split("-").map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  date.setUTCDate(date.getUTCDate() + days);
+  return getLocalDateString(date, "UTC");
+}
+
+/** Día de la semana (0=domingo) de una fecha "YYYY-MM-DD" -- misma aritmética pura que `addDaysToDateString`. */
+export function dayOfWeekFromDateString(dateString: string): number {
+  const [y, m, d] = dateString.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+}
+
+/** Días de calendario desde "hoy" (zona del negocio) hasta `dateString` -- negativo si ya pasó. Valida `booking_window_days` del lado del servidor: sin esto, alguien que llame directo a la API podría seguir reservando para un año que no corresponde. */
+export function daysFromToday(dateString: string, timeZone: string): number {
+  const todayStr = getTodayDateString(timeZone);
+  const [ty, tm, td] = todayStr.split("-").map(Number);
+  const [dy, dm, dd] = dateString.split("-").map(Number);
+  const todayUTC = Date.UTC(ty, tm - 1, td);
+  const targetUTC = Date.UTC(dy, dm - 1, dd);
+  return Math.round((targetUTC - todayUTC) / 86400000);
+}

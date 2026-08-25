@@ -6,6 +6,8 @@ export type Tenant = {
   slug: string;
   owner_id: string | null;
   timezone: string;
+  slot_interval_minutes: number;
+  booking_window_days: number;
   brand_color: string;
   brand_style_preset: "clasico" | "elegante" | "deportivo" | "minimal";
   logo_url: string | null;

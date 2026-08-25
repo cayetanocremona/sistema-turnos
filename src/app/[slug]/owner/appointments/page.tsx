@@ -17,21 +17,21 @@ export default async function AppointmentsPage({ params }: PageProps<"/[slug]/ow
   const business = await getOwnedTenant(supabaseServer, slug, user!.id);
   if (!business) return null;
 
-  const [{ data: resources }, { data: services }] = await Promise.all([
+  // Las 3 consultas solo dependen de business.id (ya resuelto arriba), no entre
+  // sí, así que van en paralelo en vez de una atrás de la otra.
+  const [{ data: resources }, { data: services }, { data: appointments, error }] = await Promise.all([
     supabaseServer.from("resources").select("id, name").eq("business_id", business.id),
     supabaseServer.from("services").select("id, name, duration_minutes, price").eq("business_id", business.id),
+    // Contiene datos privados del negocio (nombre/teléfono del cliente): va con el cliente
+    // autenticado para que RLS filtre solo los turnos de este negocio.
+    supabaseServer
+      .from("appointments")
+      .select("*, resources(name), services(name), clients(name, phone)")
+      .eq("business_id", business.id)
+      .order("start_time", { ascending: false }),
   ]);
   const resourceList = resources ?? [];
   const serviceList = services ?? [];
-
-  // Contiene datos privados del negocio (nombre/teléfono del cliente): va con el cliente
-  // autenticado para que RLS filtre solo los turnos de este negocio.
-  const { data: appointments, error } = await supabaseServer
-    .from("appointments")
-    .select("*, resources(name), services(name), clients(name, phone)")
-    .eq("business_id", business.id)
-    .order("start_time", { ascending: false });
-
   const appointmentList = appointments ?? [];
 
   return (
@@ -64,12 +64,13 @@ export default async function AppointmentsPage({ params }: PageProps<"/[slug]/ow
             </tr>
           </thead>
           <tbody>
-            {appointmentList.map((a) => {
+            {appointmentList.map((a, i) => {
               const isCancelled = a.status === "cancelled";
               return (
                 <tr
                   key={a.id}
-                  className={`border-b border-black/[0.04] transition-opacity last:border-0 ${isCancelled ? "opacity-50" : ""}`}
+                  className={`animate-fade-in-up border-b border-black/[0.04] transition-opacity last:border-0 ${isCancelled ? "opacity-50" : ""}`}
+                  style={{ animationDelay: `${Math.min(i, 12) * 40}ms` }}
                 >
                   <td className="px-5 py-3 font-medium text-neutral-800">{a.resources?.name}</td>
                   <td className="px-5 py-3 text-neutral-600">{a.services?.name ?? "—"}</td>

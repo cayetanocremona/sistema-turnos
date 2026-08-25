@@ -16,6 +16,9 @@ function formatPrice(p: number | string) {
 type Business = {
   id: string;
   name: string;
+  timezone: string;
+  slot_interval_minutes: number;
+  booking_window_days: number;
   logo_url: string | null;
   hero_image_url: string | null;
 };
@@ -394,7 +397,17 @@ export default function BrandedStorefront({
             </p>
           ) : (
             <div style={{ maxWidth: 420 }}>
-              <PublicAppointmentForm resources={resourceList} services={serviceList} action={action} theme={theme} />
+              <PublicAppointmentForm
+                businessId={business.id}
+                resources={resourceList}
+                services={serviceList}
+                hoursList={hoursList}
+                timezone={business.timezone}
+                slotIntervalMinutes={business.slot_interval_minutes}
+                bookingWindowDays={business.booking_window_days}
+                action={action}
+                theme={theme}
+              />
             </div>
           )}
         </div>

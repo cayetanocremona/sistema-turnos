@@ -8,7 +8,7 @@ import type { HTMLAttributes } from "react";
 export default function Card({ className = "", ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`rounded-[26px] border border-black/[0.06] bg-white ${className}`}
+      className={`rounded-[26px] border border-black/[0.06] bg-white transition-[transform,box-shadow] duration-200 ${className}`}
       {...props}
     />
   );

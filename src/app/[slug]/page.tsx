@@ -5,7 +5,14 @@ import { resolveTenant } from "@/lib/tenant";
 import BrandedStorefront from "./BrandedStorefront";
 import DefaultStorefront from "./DefaultStorefront";
 import { getStorefrontTheme } from "./theme";
-import { localInputToInstant, getLocalDateParts, addMinutesToInstant } from "@/lib/datetime";
+import {
+  localInputToInstant,
+  getLocalDateParts,
+  addMinutesToInstant,
+  getLocalDateString,
+  daysFromToday,
+} from "@/lib/datetime";
+import { isSlotAligned } from "@/lib/slots";
 
 function timeStringToMinutes(t: string) {
   const [hours, minutes] = t.split(":").map(Number);
@@ -72,7 +79,7 @@ export default async function BusinessPage({ params }: PageProps<"/[slug]">) {
 
     const { data: currentBusiness, error: findBusinessError } = await supabase
       .from("businesses")
-      .select("id, timezone")
+      .select("id, timezone, slot_interval_minutes, booking_window_days")
       .eq("slug", slug)
       .maybeSingle();
 
@@ -107,6 +114,15 @@ export default async function BusinessPage({ params }: PageProps<"/[slug]">) {
       return { error: "Los turnos deben empezar y terminar el mismo día.", success: false };
     }
 
+    // booking_window_days: mismo criterio que el selector de fecha en la UI,
+    // pero validado de nuevo acá porque alguien podría llamar la Server Action
+    // sin pasar por el picker (ej. directo a la API de Supabase).
+    const startDateString = getLocalDateString(startInstant, currentBusiness.timezone);
+    const daysUntil = daysFromToday(startDateString, currentBusiness.timezone);
+    if (daysUntil < 0 || daysUntil > currentBusiness.booking_window_days) {
+      return { error: "Esa fecha está fuera de la ventana de reserva permitida.", success: false };
+    }
+
     const { data: hoursForDay, error: hoursError } = await supabase
       .from("business_hours")
       .select("start_time, end_time")
@@ -126,6 +142,23 @@ export default async function BusinessPage({ params }: PageProps<"/[slug]">) {
     if (!fitsInHours) {
       return {
         error: "Ese horario está fuera del horario de atención del negocio.",
+        success: false,
+      };
+    }
+
+    // slot_interval_minutes: la UI nueva (DateTimePicker/BrandedDateTimePicker)
+    // solo ofrece horarios ya alineados a la grilla, pero se valida de nuevo
+    // acá por el mismo motivo que booking_window_days arriba.
+    if (
+      !isSlotAligned(
+        startParts.timeMinutes,
+        endParts.timeMinutes,
+        hoursForDay ?? [],
+        currentBusiness.slot_interval_minutes
+      )
+    ) {
+      return {
+        error: "Ese horario no coincide con la grilla de turnos del negocio.",
         success: false,
       };
     }

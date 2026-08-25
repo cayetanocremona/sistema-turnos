@@ -46,7 +46,7 @@ export default async function AdminSwitcher() {
         <div className="flex flex-col gap-3">
           {businessList.map((b) => (
             <Link key={b.id} href={`/${b.slug}/owner`}>
-              <Card className="flex items-center justify-between p-5 transition-shadow hover:shadow-md">
+              <Card className="flex items-center justify-between p-5 hover:-translate-y-0.5 hover:shadow-md">
                 <div>
                   <div className="font-semibold text-neutral-900">{b.name}</div>
                   <div className="text-xs text-neutral-500">/{b.slug}</div>
