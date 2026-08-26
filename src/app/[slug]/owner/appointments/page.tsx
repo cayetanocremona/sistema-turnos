@@ -17,21 +17,24 @@ export default async function AppointmentsPage({ params }: PageProps<"/[slug]/ow
   const business = await getOwnedTenant(supabaseServer, slug, user!.id);
   if (!business) return null;
 
-  // Las 3 consultas solo dependen de business.id (ya resuelto arriba), no entre
+  // Las 4 consultas solo dependen de business.id (ya resuelto arriba), no entre
   // sí, así que van en paralelo en vez de una atrás de la otra.
-  const [{ data: resources }, { data: services }, { data: appointments, error }] = await Promise.all([
-    supabaseServer.from("resources").select("id, name").eq("business_id", business.id),
-    supabaseServer.from("services").select("id, name, duration_minutes, price").eq("business_id", business.id),
-    // Contiene datos privados del negocio (nombre/teléfono del cliente): va con el cliente
-    // autenticado para que RLS filtre solo los turnos de este negocio.
-    supabaseServer
-      .from("appointments")
-      .select("*, resources(name), services(name), clients(name, phone)")
-      .eq("business_id", business.id)
-      .order("start_time", { ascending: false }),
-  ]);
+  const [{ data: resources }, { data: services }, { data: resourceServices }, { data: appointments, error }] =
+    await Promise.all([
+      supabaseServer.from("resources").select("id, name").eq("business_id", business.id),
+      supabaseServer.from("services").select("id, name, duration_minutes, price").eq("business_id", business.id),
+      supabaseServer.from("resource_services").select("resource_id, service_id").eq("business_id", business.id),
+      // Contiene datos privados del negocio (nombre/teléfono del cliente): va con el cliente
+      // autenticado para que RLS filtre solo los turnos de este negocio.
+      supabaseServer
+        .from("appointments")
+        .select("*, resources(name), services(name), clients(name, phone)")
+        .eq("business_id", business.id)
+        .order("start_time", { ascending: false }),
+    ]);
   const resourceList = resources ?? [];
   const serviceList = services ?? [];
+  const resourceServiceList = resourceServices ?? [];
   const appointmentList = appointments ?? [];
 
   return (
@@ -43,6 +46,7 @@ export default async function AppointmentsPage({ params }: PageProps<"/[slug]/ow
           businessId={business.id}
           resources={resourceList}
           services={serviceList}
+          resourceServices={resourceServiceList}
           action={addAppointment}
         />
       </Card>
@@ -89,9 +93,11 @@ export default async function AppointmentsPage({ params }: PageProps<"/[slug]/ow
                       status={a.status}
                       slug={slug}
                       resourceId={a.resource_id}
+                      serviceId={a.service_id}
                       startTime={a.start_time}
                       timezone={business.timezone}
                       resources={resourceList}
+                      resourceServices={resourceServiceList}
                       cancelAction={cancelAppointment}
                       rescheduleAction={rescheduleAppointment}
                     />

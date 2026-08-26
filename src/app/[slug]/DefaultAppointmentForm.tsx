@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import Button from "@/components/ui/Button";
 import DateTimePicker from "./DateTimePicker";
+import { filterServicesForResource, type ResourceServiceLink } from "@/lib/resourceServices";
 
 type Resource = { id: string; name: string };
 type Service = { id: string; name: string; duration_minutes: number; price: number | string };
@@ -21,6 +22,7 @@ export default function DefaultAppointmentForm({
   businessId,
   resources,
   services,
+  resourceServices,
   hoursList,
   timezone,
   slotIntervalMinutes,
@@ -30,6 +32,7 @@ export default function DefaultAppointmentForm({
   businessId: string;
   resources: Resource[];
   services: Service[];
+  resourceServices: ResourceServiceLink[];
   hoursList: BusinessHour[];
   timezone: string;
   slotIntervalMinutes: number;
@@ -44,9 +47,20 @@ export default function DefaultAppointmentForm({
   const [resourceId, setResourceId] = useState("");
   const [serviceId, setServiceId] = useState("");
   const [startTime, setStartTime] = useState("");
-  const selectedService = services.find((s) => s.id === serviceId);
+  const availableServices = resourceId
+    ? filterServicesForResource(services, resourceId, resourceServices)
+    : services;
+  const selectedService = availableServices.find((s) => s.id === serviceId);
 
   const canSubmit = hasServices ? Boolean(startTime) : true;
+
+  function handleResourceChange(newResourceId: string) {
+    setResourceId(newResourceId);
+    const stillValid = filterServicesForResource(services, newResourceId, resourceServices).some(
+      (s) => s.id === serviceId
+    );
+    if (!stillValid) setServiceId("");
+  }
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
@@ -54,7 +68,7 @@ export default function DefaultAppointmentForm({
         name="resource_id"
         required
         value={resourceId}
-        onChange={(e) => setResourceId(e.target.value)}
+        onChange={(e) => handleResourceChange(e.target.value)}
         className={fieldClass}
       >
         <option value="" disabled>
@@ -78,7 +92,7 @@ export default function DefaultAppointmentForm({
           <option value="" disabled>
             Elegí un servicio
           </option>
-          {services.map((s) => (
+          {availableServices.map((s) => (
             <option key={s.id} value={s.id}>
               {formatServiceOption(s)}
             </option>

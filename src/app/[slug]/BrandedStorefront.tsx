@@ -3,6 +3,7 @@ import { getBusinessInitials } from "@/lib/branding";
 import { StorefrontTheme } from "./theme";
 import PublicAppointmentForm from "./PublicAppointmentForm";
 import { APP_NAME } from "@/lib/constants";
+import type { ResourceServiceLink } from "@/lib/resourceServices";
 
 const DAY_NAMES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
@@ -229,6 +230,7 @@ export default function BrandedStorefront({
   resourceList,
   hoursList,
   serviceList,
+  resourceServiceList,
   action,
 }: {
   business: Business;
@@ -236,6 +238,7 @@ export default function BrandedStorefront({
   resourceList: Resource[];
   hoursList: BusinessHour[];
   serviceList: Service[];
+  resourceServiceList: ResourceServiceLink[];
   action: (
     prevState: PublicAppointmentFormState,
     formData: FormData
@@ -415,6 +418,7 @@ export default function BrandedStorefront({
                 businessId={business.id}
                 resources={resourceList}
                 services={serviceList}
+                resourceServices={resourceServiceList}
                 hoursList={hoursList}
                 timezone={business.timezone}
                 slotIntervalMinutes={business.slot_interval_minutes}

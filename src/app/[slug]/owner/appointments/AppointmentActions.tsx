@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import type { AppointmentMutationState } from "../actions";
 import { instantToLocalInputValue } from "@/lib/datetime";
 import Button from "@/components/ui/Button";
+import { filterResourcesForService, type ResourceServiceLink } from "@/lib/resourceServices";
 
 type Resource = { id: string; name: string };
 
@@ -17,9 +18,11 @@ export default function AppointmentActions({
   status,
   slug,
   resourceId,
+  serviceId,
   startTime,
   timezone,
   resources,
+  resourceServices,
   cancelAction,
   rescheduleAction,
 }: {
@@ -27,12 +30,23 @@ export default function AppointmentActions({
   status: string;
   slug: string;
   resourceId: string;
+  serviceId: string | null;
   startTime: string;
   timezone: string;
   resources: Resource[];
+  resourceServices: ResourceServiceLink[];
   cancelAction: MutationAction;
   rescheduleAction: MutationAction;
 }) {
+  // El turno mantiene su servicio original al reagendar (no hay selector de
+  // servicio acá, ver actions.ts) -- así que en vez de filtrar servicios por
+  // recurso como en los forms de alta, acá se filtra al revés: solo se
+  // ofrecen los recursos compatibles con el servicio que el turno ya tiene.
+  // Sin servicio (turno legacy sin catálogo) no hay nada que validar, se
+  // muestran todos los recursos como siempre.
+  const availableResources = serviceId
+    ? filterResourcesForService(resources, serviceId, resourceServices)
+    : resources;
   const [isRescheduling, setIsRescheduling] = useState(false);
   const [cancelState, cancelFormAction, isCancelling] = useActionState(cancelAction, {
     error: null,
@@ -81,7 +95,7 @@ export default function AppointmentActions({
             defaultValue={resourceId}
             className="rounded-lg border border-black/10 px-2.5 py-1.5 text-xs outline-none focus:border-[var(--brand-accent)]"
           >
-            {resources.map((r) => (
+            {availableResources.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.name}
               </option>

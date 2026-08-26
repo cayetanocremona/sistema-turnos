@@ -30,29 +30,32 @@ export default async function BusinessPage({ params }: PageProps<"/[slug]">) {
     notFound();
   }
 
-  const [{ data: resources }, { data: businessHours }, { data: services }] = await Promise.all([
-    supabase
-      .from("resources")
-      .select("*")
-      .eq("business_id", business.id)
-      .order("created_at", { ascending: true }),
-    supabase
-      .from("business_hours")
-      .select("*")
-      .eq("business_id", business.id)
-      .order("day_of_week", { ascending: true }),
-    supabase
-      .from("services")
-      .select("*")
-      .eq("business_id", business.id)
-      .order("created_at", { ascending: true }),
-  ]);
+  const [{ data: resources }, { data: businessHours }, { data: services }, { data: resourceServices }] =
+    await Promise.all([
+      supabase
+        .from("resources")
+        .select("*")
+        .eq("business_id", business.id)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("business_hours")
+        .select("*")
+        .eq("business_id", business.id)
+        .order("day_of_week", { ascending: true }),
+      supabase
+        .from("services")
+        .select("*")
+        .eq("business_id", business.id)
+        .order("created_at", { ascending: true }),
+      supabase.from("resource_services").select("resource_id, service_id").eq("business_id", business.id),
+    ]);
 
   const resourceList = resources ?? [];
   const hoursList = (businessHours ?? [])
     .slice()
     .sort((a, b) => a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time));
   const serviceList = services ?? [];
+  const resourceServiceList = resourceServices ?? [];
 
   async function addPublicAppointment(
     _prevState: PublicAppointmentFormState,
@@ -227,6 +230,7 @@ export default async function BusinessPage({ params }: PageProps<"/[slug]">) {
         resourceList={resourceList}
         hoursList={hoursList}
         serviceList={serviceList}
+        resourceServiceList={resourceServiceList}
         action={addPublicAppointment}
       />
     );
@@ -240,6 +244,7 @@ export default async function BusinessPage({ params }: PageProps<"/[slug]">) {
       resourceList={resourceList}
       hoursList={hoursList}
       serviceList={serviceList}
+      resourceServiceList={resourceServiceList}
       action={addPublicAppointment}
     />
   );

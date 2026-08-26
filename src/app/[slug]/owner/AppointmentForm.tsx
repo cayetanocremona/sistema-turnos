@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { AppointmentFormState } from "./actions";
 import Button from "@/components/ui/Button";
+import { filterServicesForResource, type ResourceServiceLink } from "@/lib/resourceServices";
 
 type Resource = { id: string; name: string };
 type Service = { id: string; name: string; duration_minutes: number; price: number | string };
@@ -19,11 +20,13 @@ export default function AppointmentForm({
   businessId,
   resources,
   services,
+  resourceServices,
   action,
 }: {
   businessId: string;
   resources: Resource[];
   services: Service[];
+  resourceServices: ResourceServiceLink[];
   action: (
     prevState: AppointmentFormState,
     formData: FormData
@@ -31,12 +34,31 @@ export default function AppointmentForm({
 }) {
   const [state, formAction, isPending] = useActionState(action, { error: null });
   const hasServices = services.length > 0;
+  const [resourceId, setResourceId] = useState("");
+  const [serviceId, setServiceId] = useState("");
+  const availableServices = resourceId
+    ? filterServicesForResource(services, resourceId, resourceServices)
+    : services;
+
+  function handleResourceChange(newResourceId: string) {
+    setResourceId(newResourceId);
+    const stillValid = filterServicesForResource(services, newResourceId, resourceServices).some(
+      (s) => s.id === serviceId
+    );
+    if (!stillValid) setServiceId("");
+  }
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
       <input type="hidden" name="business_id" value={businessId} />
 
-      <select name="resource_id" required defaultValue="" className={fieldClass}>
+      <select
+        name="resource_id"
+        required
+        value={resourceId}
+        onChange={(e) => handleResourceChange(e.target.value)}
+        className={fieldClass}
+      >
         <option value="" disabled>
           Elegí un recurso
         </option>
@@ -48,11 +70,17 @@ export default function AppointmentForm({
       </select>
 
       {hasServices && (
-        <select name="service_id" required defaultValue="" className={fieldClass}>
+        <select
+          name="service_id"
+          required
+          value={serviceId}
+          onChange={(e) => setServiceId(e.target.value)}
+          className={fieldClass}
+        >
           <option value="" disabled>
             Elegí un servicio
           </option>
-          {services.map((s) => (
+          {availableServices.map((s) => (
             <option key={s.id} value={s.id}>
               {formatServiceOption(s)}
             </option>

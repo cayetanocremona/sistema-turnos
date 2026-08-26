@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import type { CSSProperties } from "react";
 import type { StorefrontTheme } from "./theme";
 import BrandedDateTimePicker from "./BrandedDateTimePicker";
+import { filterServicesForResource, type ResourceServiceLink } from "@/lib/resourceServices";
 
 type Resource = { id: string; name: string };
 type Service = { id: string; name: string; duration_minutes: number; price: number | string };
@@ -19,6 +20,7 @@ export default function PublicAppointmentForm({
   businessId,
   resources,
   services,
+  resourceServices,
   hoursList,
   timezone,
   slotIntervalMinutes,
@@ -29,6 +31,7 @@ export default function PublicAppointmentForm({
   businessId: string;
   resources: Resource[];
   services: Service[];
+  resourceServices: ResourceServiceLink[];
   hoursList: BusinessHour[];
   timezone: string;
   slotIntervalMinutes: number;
@@ -48,8 +51,19 @@ export default function PublicAppointmentForm({
   const [resourceId, setResourceId] = useState("");
   const [serviceId, setServiceId] = useState("");
   const [startTime, setStartTime] = useState("");
-  const selectedService = services.find((s) => s.id === serviceId);
+  const availableServices = resourceId
+    ? filterServicesForResource(services, resourceId, resourceServices)
+    : services;
+  const selectedService = availableServices.find((s) => s.id === serviceId);
   const canSubmit = hasServices ? Boolean(startTime) : true;
+
+  function handleResourceChange(newResourceId: string) {
+    setResourceId(newResourceId);
+    const stillValid = filterServicesForResource(services, newResourceId, resourceServices).some(
+      (s) => s.id === serviceId
+    );
+    if (!stillValid) setServiceId("");
+  }
 
   const fieldStyle: CSSProperties = {
     padding: 10,
@@ -91,7 +105,7 @@ export default function PublicAppointmentForm({
         name="resource_id"
         required
         value={resourceId}
-        onChange={(e) => setResourceId(e.target.value)}
+        onChange={(e) => handleResourceChange(e.target.value)}
         style={fieldStyle}
       >
         <option value="" disabled>
@@ -115,7 +129,7 @@ export default function PublicAppointmentForm({
           <option value="" disabled>
             Elegí un servicio
           </option>
-          {services.map((s) => (
+          {availableServices.map((s) => (
             <option key={s.id} value={s.id}>
               {formatServiceOption(s)}
             </option>
