@@ -4,6 +4,7 @@ import Card from "@/components/ui/Card";
 import Pill from "@/components/ui/Pill";
 import StickyBookingCard from "@/components/ui/StickyBookingCard";
 import DefaultAppointmentForm from "./DefaultAppointmentForm";
+import { APP_NAME } from "@/lib/constants";
 
 const DAY_NAMES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
@@ -190,6 +191,10 @@ export default function DefaultStorefront({
           <div className="hidden w-[360px] shrink-0 lg:block">
             <StickyBookingCard className="animate-fade-in-up">{bookingForm}</StickyBookingCard>
           </div>
+        </div>
+
+        <div className="mt-12 border-t border-black/[0.06] pt-6 text-center text-xs text-neutral-400">
+          Powered by {APP_NAME}
         </div>
       </div>
     </div>

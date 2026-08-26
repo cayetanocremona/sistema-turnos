@@ -1,4 +1,8 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Reservy
+
+Sistema de gestión de turnos (multi-tenant): panel de administración para dueños de negocio + web pública para que el cliente final reserve online.
+
+Este es un proyecto [Next.js](https://nextjs.org) bootstrapeado con [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 

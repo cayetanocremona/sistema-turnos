@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { getBusinessInitials } from "@/lib/branding";
 import { StorefrontTheme } from "./theme";
 import PublicAppointmentForm from "./PublicAppointmentForm";
+import { APP_NAME } from "@/lib/constants";
 
 const DAY_NAMES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 
@@ -410,6 +411,19 @@ export default function BrandedStorefront({
               />
             </div>
           )}
+        </div>
+
+        <div
+          style={{
+            margin: `40px ${sidePad} 0 ${sidePad}`,
+            paddingTop: 20,
+            borderTop: `1px solid ${theme.cardBorder}`,
+            fontSize: 12,
+            color: theme.mutedText,
+            textAlign: "center",
+          }}
+        >
+          Powered by {APP_NAME}
         </div>
       </main>
     </div>

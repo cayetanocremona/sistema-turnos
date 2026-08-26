@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
+import { APP_NAME, APP_TAGLINE } from "@/lib/constants";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -9,8 +10,8 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "Sistema de Gestión de Turnos",
-  description: "MVP — v0",
+  title: `${APP_NAME} — ${APP_TAGLINE}`,
+  description: `${APP_NAME}: reservá y gestioná turnos online, para cualquier tipo de negocio.`,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

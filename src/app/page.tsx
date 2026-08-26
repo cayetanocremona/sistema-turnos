@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import Card from "@/components/ui/Card";
 import { buttonClassName } from "@/components/ui/Button";
+import { APP_NAME } from "@/lib/constants";
 
 const STEPS = [
   {
@@ -48,7 +49,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   return (
     <div className="flex min-h-screen w-full flex-col bg-white text-neutral-900">
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 px-4 py-6 sm:px-6">
-        <span className="text-base font-extrabold">Sistema de Turnos</span>
+        <span className="text-base font-extrabold">{APP_NAME}</span>
         <Link href={user ? "/admin" : "/login"} className="text-sm font-semibold text-neutral-600 hover:text-neutral-900">
           {user ? "Mis negocios" : "Iniciar sesión"}
         </Link>
@@ -115,7 +116,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
       <footer className="w-full border-t border-black/[0.06]">
         <div className="mx-auto max-w-5xl px-4 py-6 text-xs text-neutral-400 sm:px-6">
-          Sistema de Gestión de Turnos — hecho para negocios de cualquier rubro.
+          {APP_NAME} — hecho para negocios de cualquier rubro.
         </div>
       </footer>
     </div>

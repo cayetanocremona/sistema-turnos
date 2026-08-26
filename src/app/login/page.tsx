@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
+import { APP_NAME } from "@/lib/constants";
 
 const fieldClass =
   "rounded-xl border border-black/10 bg-white px-3.5 py-2.5 text-sm text-neutral-900 outline-none focus:border-[var(--brand-accent)]";
@@ -39,7 +40,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen w-full flex-col bg-white text-neutral-900">
       <header className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
         <Link href="/" className="text-base font-extrabold">
-          Sistema de Turnos
+          {APP_NAME}
         </Link>
       </header>
 
