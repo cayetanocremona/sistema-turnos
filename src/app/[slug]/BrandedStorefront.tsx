@@ -135,7 +135,11 @@ function Hero({ business, theme }: { business: Business; theme: StorefrontTheme 
           inset: 0,
           backgroundImage: `url(${business.hero_image_url})`,
           backgroundSize: "cover",
-          backgroundPosition: "center",
+          // El banner recorta la foto mucho más en alto que en ancho -- "center"
+          // dejaba la franja visible sobre todo en la parte de arriba de la
+          // imagen (cielo). Ancla el recorte hacia abajo para priorizar el
+          // sujeto (cancha/pasto) sobre el fondo (cielo).
+          backgroundPosition: "center 85%",
           zIndex: 0,
         }}
       >
@@ -160,7 +164,7 @@ function Hero({ business, theme }: { business: Business; theme: StorefrontTheme 
           overflow: "hidden",
           backgroundImage: `url(${business.hero_image_url})`,
           backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundPosition: "center 85%",
         }}
       />
     );
