@@ -263,6 +263,14 @@ export default function BrandedStorefront({
             position: "relative",
             background: theme.heroBg,
             overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            // Con foto real, la franja pasa de "alto = contenido" a una altura
+            // fija generosa (~280-340px desktop, menor en mobile vía clamp) para
+            // que la imagen sea protagonista, no una tira angosta -- sin foto,
+            // se preserva el comportamiento original (alto = badge + título).
+            minHeight: business.hero_image_url ? "clamp(200px, 30vw, 340px)" : undefined,
+            justifyContent: business.hero_image_url ? "flex-end" : "flex-start",
           }}
         >
           <Hero business={business} theme={theme} />
@@ -272,6 +280,7 @@ export default function BrandedStorefront({
               zIndex: 1,
               maxWidth: 1040,
               margin: "0 auto",
+              width: "100%",
               padding: `20px ${sidePad} 30px ${sidePad}`,
             }}
           >
