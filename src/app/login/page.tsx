@@ -19,11 +19,12 @@ export default function LoginPage() {
     setStatus("sending");
     setError(null);
 
+    // Sin emailRedirectTo: el link del mail ya no apunta a /auth/callback
+    // (flujo PKCE viejo) -- ahora usa el template de Supabase con
+    // token_hash, que resuelve en /auth/confirm. Ver AGENTS.md "Fix del
+    // magic link (prefetch de Gmail)".
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    });
+    const { error } = await supabase.auth.signInWithOtp({ email });
 
     if (error) {
       setStatus("error");
