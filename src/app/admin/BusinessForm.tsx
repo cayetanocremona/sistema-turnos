@@ -22,6 +22,14 @@ export default function BusinessForm({
         <input name="slug" placeholder="slug (ej: mi-negocio)" required className={fieldClass} />
       </div>
       <div>
+        <input
+          name="invite_code"
+          placeholder="Código de invitación"
+          required
+          className={fieldClass}
+        />
+      </div>
+      <div>
         <Button type="submit" disabled={isPending}>
           {isPending ? "Creando..." : "Crear negocio"}
         </Button>

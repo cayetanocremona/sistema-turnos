@@ -24,9 +24,10 @@ export async function addBusiness(
 
   const name = (formData.get("name") as string)?.trim();
   const rawSlug = ((formData.get("slug") as string) ?? "").trim();
+  const inviteCode = ((formData.get("invite_code") as string) ?? "").trim();
 
-  if (!name || !rawSlug) {
-    return { error: "Completá el nombre y el slug." };
+  if (!name || !rawSlug || !inviteCode) {
+    return { error: "Completá el nombre, el slug y el código de invitación." };
   }
 
   // Normaliza a minúsculas, sin acentos, y solo letras/números/guiones.
@@ -47,11 +48,19 @@ export async function addBusiness(
     return { error: "Ese nombre de URL está reservado, elegí otro." };
   }
 
-  const { error } = await supabaseServer
-    .from("businesses")
-    .insert({ name, slug, owner_id: user.id });
+  const { error } = await supabaseServer.rpc("create_business_with_invite", {
+    p_code: inviteCode,
+    p_name: name,
+    p_slug: slug,
+  });
 
   if (error) {
+    if (error.message === "invalid_or_used_invite_code") {
+      return { error: "Código inválido o ya usado." };
+    }
+    if (error.code === "23505" && error.message.includes("businesses_name_unique_ci")) {
+      return { error: "Ya existe un negocio con ese nombre." };
+    }
     if (error.code === "23505") {
       return { error: "Ese slug ya está en uso, elegí otro." };
     }
