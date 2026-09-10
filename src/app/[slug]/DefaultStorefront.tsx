@@ -4,6 +4,7 @@ import Card from "@/components/ui/Card";
 import Pill from "@/components/ui/Pill";
 import StickyBookingCard from "@/components/ui/StickyBookingCard";
 import DefaultAppointmentForm from "./DefaultAppointmentForm";
+import { SellCtaBar, SellFooterContact } from "@/components/SellCta";
 import { APP_NAME } from "@/lib/constants";
 import type { ResourceServiceLink } from "@/lib/resourceServices";
 
@@ -89,6 +90,7 @@ export default function DefaultStorefront({
       className="min-h-screen w-full bg-neutral-50"
       style={{ "--brand-accent": business.brand_color, "--brand-accent-contrast": accentText } as CSSProperties}
     >
+      <SellCtaBar />
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
           <div className="flex-1">
@@ -197,8 +199,9 @@ export default function DefaultStorefront({
           </div>
         </div>
 
-        <div className="mt-12 border-t border-black/[0.06] pt-6 text-center text-xs text-neutral-400">
-          Powered by {APP_NAME}
+        <div className="mt-12 flex flex-col items-center gap-1.5 border-t border-black/[0.06] pt-6 text-center text-xs text-neutral-400">
+          <span>Powered by {APP_NAME}</span>
+          <SellFooterContact />
         </div>
       </div>
     </div>

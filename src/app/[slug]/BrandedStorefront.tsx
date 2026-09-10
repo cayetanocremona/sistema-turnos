@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { getBusinessInitials } from "@/lib/branding";
 import { StorefrontTheme } from "./theme";
 import PublicAppointmentForm from "./PublicAppointmentForm";
+import { SellCtaBar, SellFooterContact } from "@/components/SellCta";
 import { APP_NAME } from "@/lib/constants";
 import type { ResourceServiceLink } from "@/lib/resourceServices";
 
@@ -264,6 +265,7 @@ export default function BrandedStorefront({
         minHeight: "100vh",
       }}
     >
+      <SellCtaBar />
       {theme.bannerLayout && (
         <div
           style={{
@@ -438,9 +440,13 @@ export default function BrandedStorefront({
             fontSize: 12,
             color: theme.mutedText,
             textAlign: "center",
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
           }}
         >
-          Powered by {APP_NAME}
+          <span>Powered by {APP_NAME}</span>
+          <SellFooterContact />
         </div>
       </main>
     </div>
