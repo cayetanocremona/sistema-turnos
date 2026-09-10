@@ -265,7 +265,7 @@ export default function BrandedStorefront({
         minHeight: "100vh",
       }}
     >
-      <SellCtaBar />
+      <SellCtaBar accent={theme.accent} accentText={theme.accentText} />
       {theme.bannerLayout && (
         <div
           style={{

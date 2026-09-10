@@ -90,7 +90,7 @@ export default function DefaultStorefront({
       className="min-h-screen w-full bg-neutral-50"
       style={{ "--brand-accent": business.brand_color, "--brand-accent-contrast": accentText } as CSSProperties}
     >
-      <SellCtaBar />
+      <SellCtaBar accent={business.brand_color} accentText={accentText} />
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
           <div className="flex-1">
